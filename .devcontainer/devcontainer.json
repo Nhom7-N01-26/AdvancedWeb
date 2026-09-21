@@ -1,0 +1,25 @@
+{
+  "name": "Node.js & MySQL - Nhom 7 Advanced Web",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "forwardPorts": [3000, 3306],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "cweijan.vscode-mysql-client2",
+        "humao.rest-client",
+        "formulahendry.auto-rename-tag",
+        "GitHub.copilot"
+      ]
+    }
+  },
+  "postCreateCommand": "cd My-Node-Project && npm install"
+}

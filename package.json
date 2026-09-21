@@ -1,0 +1,19 @@
+{
+  "name": "nhom-7-advanced-web",
+  "version": "1.0.0",
+  "description": "Novel Manager Project - Nhom 7 Advanced Web",
+  "main": "dbconnection.js",
+  "scripts": {
+    "start": "cd My-Node-Project && node index.js",
+    "test-db": "node dbconnection.js",
+    "dev": "cd My-Node-Project && node --watch index.js"
+  },
+  "author": "Nhom 7",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^5.2.1",
+    "mysql2": "^3.9.0"
+  }
+}
