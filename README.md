@@ -1,4 +1,4 @@
-# BÁO CÁO BÀI TẬP NHÓM: PHÁT TRIỂN ỨNG DỤNG WEB NÂNG CAO
+# BÁO CÁO BÀI TẬP NHÓM: XÂY DỰNG PHÁT TRIỂN ỨNG DỤNG WEB NÂNG CAO
 ## Đề tài: Hệ Thống Quản Lý & Đọc Tiểu Thuyết (Novel Manager) - Nhóm 7
 
 ---
