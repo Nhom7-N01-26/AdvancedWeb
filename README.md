@@ -4,13 +4,11 @@
 
 ---
 
-## 1. Thông Tin Nhóm & Link Repository
+## 1. Repository
 
-- **Link Git Repository của nhóm:** [https://github.com/Nhom7-N01-26/AdvancedWeb](https://github.com/Nhom7-N01-26/AdvancedWeb)
-- **Học phần:** Phát triển ứng dụng Web nâng cao (Advanced Web)
-- **Nhóm thực hiện:** Nhóm 7 (N01-26)
+- **Repository:** [https://github.com/Nhom7-N01-26/AdvancedWeb](https://github.com/Nhom7-N01-26/AdvancedWeb)
 
-### Danh sách thành viên nhóm (Collaborators trên GitHub):
+### Thành viên nhóm (Collaborators):
 | STT | Họ và tên | GitHub Username / Email | Vai trò & Phân công nhiệm vụ |
 |:---:|:---|:---|:---|
 | 1 | **Lê Thanh Bình** (lebinh17) | `23010242@st.phenikaa-uni.edu.vn` | Thiết kế CSDL, tạo `.sql`, cấu hình `dbconnection.js`, CRUD Novels & Categories |
@@ -21,20 +19,18 @@
 
 ## 2. Cấu Trúc Repository
 
-Repository được tổ chức chuẩn hóa đáp ứng 100% các tiêu chí nộp bài:
-
-```text
+---
 AdvancedWeb/
-├── .devcontainer/                  # [Yêu cầu 1] Môi trường chuẩn hóa DevContainer
-│   ├── devcontainer.json           # File cấu hình DevContainer theo hướng dẫn của GV
-│   └── docker-compose.yml          # Khởi chạy đồng thời Node.js app & MySQL 8.0
-├── screenshots/                    # [Yêu cầu nộp] Thư mục chứa ảnh minh chứng
-│   ├── cau3_database.png           # Ảnh chụp màn hình Hệ quản trị CSDL (Câu 3)
-│   ├── cau4_dbconnection.png       # Ảnh chụp màn hình kết nối CSDL (Câu 4)
-│   └── cau5_crud_postman.png       # Ảnh chụp màn hình test CRUD (Câu 5)
-├── My-Node-Project/                # Mã nguồn ứng dụng Backend (Node.js & Express)
+├── .devcontainer/
+│   ├── devcontainer.json
+│   └── docker-compose.yml
+├── screenshots/
+│   ├── cau3_database.png
+│   ├── cau4_dbconnection.png
+│   └── cau5_crud_postman.png
+├── My-Node-Project/
 │   ├── src/
-│   │   ├── controllers/            # [Yêu cầu 5] Các bộ điều khiển xử lý CRUD
+│   │   ├── controllers/
 │   │   │   ├── user.controller.js
 │   │   │   ├── novel.controller.js
 │   │   │   ├── category.controller.js
@@ -42,20 +38,18 @@ AdvancedWeb/
 │   │   │   ├── chapter.controller.js
 │   │   │   └── tag.controller.js
 │   │   ├── routes/
-│   │   │   └── api.routes.js       # Định tuyến RESTful API tập trung
-│   │   └── entities/               # Model TypeScript entities
-│   ├── dbconnection.js             # Kết nối CSDL dùng trong Express
-│   ├── index.js                    # Server chính Express
+│   │   │   └── api.routes.js
+│   │   └── entities/            
+│   ├── dbconnection.js
+│   ├── index.js
 │   ├── package.json
 │   └── tsconfig.json
-├── .env.example                    # File mẫu biến môi trường
-├── .env                            # Cấu hình kết nối MySQL cục bộ
-├── dbconnection.js                 # [Yêu cầu 4] File kiểm tra kết nối CSDL tại root
-├── package.json                    # Package runner tại thư mục gốc
-├── sql_nhom_7.sql                  # [Yêu cầu 2] File kịch bản CSDL đầy đủ
-└── README.md                       # Báo cáo tổng hợp nộp bài
-```
-
+├── .env.example
+├── .env
+├── dbconnection.js
+├── package.json
+├── sql_nhom_7.sql
+└── README.md
 ---
 
 ## 3. Nội Dung Trả Lời Các Yêu Cầu
