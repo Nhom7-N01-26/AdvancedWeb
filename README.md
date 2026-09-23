@@ -18,7 +18,6 @@
 ---
 
 ## 2. Cấu Trúc Repository
----
 
 '''
 AdvancedWeb/
@@ -52,7 +51,6 @@ AdvancedWeb/
 ├── sql_nhom_7.sql
 └── README.md
 '''
-
 ---
 
 ## 3. Nội Dung Trả Lời Các Yêu Cầu
