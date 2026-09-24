@@ -18,7 +18,7 @@
 ---
 
 ## 2. Cấu Trúc Repository
----
+
 ```text
 AdvancedWeb/
 ├── .devcontainer/
@@ -50,6 +50,8 @@ AdvancedWeb/
 ├── package.json
 ├── sql_nhom_7.sql
 └── README.md
+```
+
 ---
 
 ## 3. Nội dung thực hiện
