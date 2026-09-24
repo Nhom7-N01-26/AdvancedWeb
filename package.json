@@ -11,9 +11,11 @@
   "author": "Nhom 7",
   "license": "ISC",
   "dependencies": {
+    "@nestjs/typeorm": "^12.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^5.2.1",
-    "mysql2": "^3.9.0"
+    "mysql2": "^3.24.4",
+    "typeorm": "^1.1.1"
   }
 }
