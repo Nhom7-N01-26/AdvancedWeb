@@ -10,8 +10,11 @@ import { TagController } from './tag.controller';
 import { UserController } from './user.controller';
 import { RatingController } from './rating.controller';
 import { ReadingHistoryController } from './reading-history.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { entities } from './entities';
 
 @Module({
+  imports: [TypeOrmModule.forFeature(entities)],
   controllers: [
     UserController,
     AuthorController,

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { CreateNovelInput, NovelService } from './novel.service';
 
 @Controller('novels')
@@ -15,5 +15,7 @@ export class NovelController {
   create(@Body() input: CreateNovelInput) { return this.novelService.create(input); }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) { this.novelService.remove(id); }
+  remove(@Param('id', ParseIntPipe) id: number) { return this.novelService.remove(id); }
+  @Patch(':id')
+  update(@Param('id', ParseIntPipe) id: number, @Body() input: Partial<CreateNovelInput>) { return this.novelService.update(id, input); }
 }

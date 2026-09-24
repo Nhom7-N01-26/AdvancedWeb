@@ -16,6 +16,6 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-    "types": ["node"]
+    "types": ["node", "vitest/globals"]
   }
 }
