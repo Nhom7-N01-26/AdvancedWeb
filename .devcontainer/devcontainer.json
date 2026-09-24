@@ -1,25 +1,17 @@
 {
-  "name": "Node.js & MySQL - Nhom 7 Advanced Web",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "forwardPorts": [3000, 3306],
+  "name": "My Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+  "features": {
+    "ghcr.io/devcontainers/features/node:2.1.0": {
+      "version": "lts"
+    }
+  },
   "customizations": {
     "vscode": {
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "editor.formatOnSave": true,
-        "editor.tabSize": 2
-      },
       "extensions": [
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
-        "cweijan.vscode-mysql-client2",
-        "humao.rest-client",
-        "formulahendry.auto-rename-tag",
         "GitHub.copilot"
       ]
     }
   },
-  "postCreateCommand": "cd My-Node-Project && npm install"
+  "postCreateCommand": "npm i -g @nestjs/cli && npm install --save @nestjs/typeorm typeorm mysql2 && npm install"
 }
