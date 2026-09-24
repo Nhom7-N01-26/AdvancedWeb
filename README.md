@@ -133,13 +133,45 @@ Triển khai đầy đủ các thao tác CRUD (Create - Read - Update - Delete) 
 
 _Ghi chú: Ảnh chụp màn hình giao diện Postman kiểm thử các thao tác CRUD (POST tạo mới, GET danh sách tiểu thuyết với status `200 OK`)._
 
+## 4. NestJS chuyển đổi
+
+Thư mục `novel/` là implementation NestJS độc lập dùng TypeORM và `mysql2`. Express trong `My-Node-Project/` vẫn được giữ nguyên để tương thích ngược; hai ứng dụng dùng cùng database nhưng chạy khác port:
+
+- Express: `3000`
+- NestJS: `3001`
+
+NestJS sử dụng `synchronize: false`, vì `sql_nhom_7.sql` là nguồn chuẩn của schema. Entity phản ánh 10 bảng hiện có, bao gồm quan hệ one-to-one, one-to-many, self-reference và many-to-many.
+
+### Kiến trúc NestJS
+
+```text
+novel/src/
+├── database/database.provider.ts
+├── entities/                 # TypeORM entities theo SQL
+├── users/ authors/ categories/
+├── tags/ novels/ chapters/   # module + provider + service + controller + DTO
+└── common/                   # validation/error helpers
+```
+
+Luồng xử lý là `Request -> Controller -> Service -> Repository provider -> TypeORM -> MySQL`. Class Diagram nằm tại [novel/docs/class-diagram.md](novel/docs/class-diagram.md), còn danh sách request kiểm thử nằm tại [novel/docs/api-test.md](novel/docs/api-test.md).
+
+### Chạy NestJS
+
+```bash
+cd novel
+npm install
+npm run start:dev
+```
+
+API NestJS có prefix `/api`, ví dụ `GET http://localhost:3001/api/novels`. Biến môi trường được mô tả trong [.env.example](.env.example); không commit file `.env` thật.
+
 ---
 
-## 4. Hướng Dẫn Cài Đặt & Khởi Chạy
+## 5. Hướng Dẫn Cài Đặt & Khởi Chạy
 
 ### Backend chính
 
-Project sử dụng **Express + MySQL trong `My-Node-Project`** làm backend chính. Thư mục `novel` là scaffold NestJS thử nghiệm và không thuộc luồng khởi chạy hiện tại.
+NestJS trong `novel/` là implementation chính cho Bài thực hành số 3. Express trong `My-Node-Project/` vẫn được giữ nguyên như backend tương thích ngược.
 
 Authentication dùng JWT. Đăng ký/đăng nhập qua `POST /api/auth/register` và `POST /api/auth/login`; các API thay đổi dữ liệu yêu cầu header `Authorization: Bearer <token>`. Role `admin` quản trị toàn bộ, role `author` chỉ thao tác trên novel/chapter của mình.
 

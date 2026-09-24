@@ -33,7 +33,7 @@ export class Novel {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ name: 'cover_image', length: 500, nullable: true })
+  @Column({ name: 'cover_image', type: 'varchar', length: 500, nullable: true })
   coverImage: string | null;
 
   @Column({ type: 'enum', enum: NovelStatus, default: NovelStatus.DRAFT })

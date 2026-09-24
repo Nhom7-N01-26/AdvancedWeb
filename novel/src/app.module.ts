@@ -1,13 +1,24 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { DomainModule } from './domain.module';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { databaseProvider } from './database.provider';
+import { AuthorsModule } from './authors/authors.module';
+import { CategoriesModule } from './categories/categories.module';
+import { ChaptersModule } from './chapters/chapters.module';
+import { databaseProvider } from './database/database.provider';
+import { NovelsModule } from './novels/novels.module';
+import { TagsModule } from './tags/tags.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(databaseProvider), DomainModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../.env', '../My-Node-Project/.env'] }),
+    TypeOrmModule.forRootAsync(databaseProvider),
+    UsersModule,
+    AuthorsModule,
+    CategoriesModule,
+    TagsModule,
+    NovelsModule,
+    ChaptersModule,
+  ],
 })
 export class AppModule {}

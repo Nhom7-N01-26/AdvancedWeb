@@ -30,7 +30,7 @@ export class User {
   @Column({ name: 'full_name', length: 100 })
   fullName: string;
 
-  @Column({ name: 'avatar_url', length: 500, nullable: true })
+  @Column({ name: 'avatar_url', type: 'varchar', length: 500, nullable: true })
   avatarUrl: string | null;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.READER })

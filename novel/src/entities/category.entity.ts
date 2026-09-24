@@ -17,7 +17,7 @@ export class Category {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   icon: string | null;
 
   @Column({ name: 'novel_count', default: 0 })
