@@ -95,17 +95,15 @@ Thực hiện kiểm tra:
 node dbconnection.js
 ```
 
----
-
-#### Ảnh chụp màn hình Câu 4: Kết nối CSDL thành công
-![Ảnh chụp màn hình Câu 4 - dbconnection.js kết nối thành công](screenshots/cau4_dbconnection.png)
+#### Ảnh chụp màn hình 3.4: Kết nối CSDL thành công
+![Ảnh chụp màn hình 3.4 - dbconnection.js kết nối thành công](screenshots/cau4_dbconnection.png)
 
 *Ghi chú: Ảnh chụp màn hình terminal thực thi `node dbconnection.js` với kết quả `[SUCCESS] Ket noi den CSDL MySQL (novel_manager) thanh cong!`.*
 
 ---
 
-### Yêu cầu 5: Tạo CRUD cho từng đối tượng sinh viên
-Nhóm đã triển khai đầy đủ các thao tác CRUD (Create - Read - Update - Delete) bằng chuẩn RESTful API cho các thực thể:
+### Tạo CRUD cho từng đối tượng sinh viên
+Triển khai đầy đủ các thao tác CRUD (Create - Read - Update - Delete) bằng chuẩn RESTful API cho các thực thể:
 
 | Thực thể | Endpoint | Method | Mô tả chức năng |
 |:---|:---|:---:|:---|
@@ -124,8 +122,8 @@ Nhóm đã triển khai đầy đủ các thao tác CRUD (Create - Read - Update
 | **Chapters** | `/api/chapters` | `GET`, `POST`, `PUT`, `DELETE` | Quản lý nội dung chương truyện |
 | **Tags** | `/api/tags` | `GET`, `POST`, `PUT`, `DELETE` | Quản lý thẻ nhãn |
 
-#### Ảnh chụp màn hình Câu 5: Kiểm thử CRUD qua Postman
-![Ảnh chụp màn hình Câu 5 - Kiểm thử API CRUD](screenshots/cau5_crud_postman.png)
+#### Ảnh chụp màn hình: Kiểm thử CRUD qua Postman
+![Ảnh chụp màn hình - Kiểm thử API CRUD](screenshots/cau5_crud_postman.png)
 
 *Ghi chú: Ảnh chụp màn hình giao diện Postman kiểm thử các thao tác CRUD (POST tạo mới, GET danh sách tiểu thuyết với status `200 OK`).*
 
