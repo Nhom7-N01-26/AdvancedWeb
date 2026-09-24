@@ -21,9 +21,123 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Mô tả đề tài
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Novel Manager là hệ thống quản lý và đọc truyện trực tuyến của Nhóm 7. Project
+được chuyển đổi sang NestJS với TypeScript và TypeORM.
+
+## Biểu đồ lớp
+
+Biểu đồ lớp được phân tích trước khi xây dựng Entity, thể hiện các đối tượng,
+thuộc tính và quan hệ chính của hệ thống.
+
+```mermaid
+classDiagram
+  class User {
+    +int id
+    +string username
+    +string email
+    +string full_name
+    +UserRole role
+  }
+  class Author {
+    +int id
+    +int user_id
+    +string pen_name
+    +string bio
+  }
+  class Novel {
+    +int id
+    +int author_id
+    +string title
+    +string slug
+    +NovelStatus status
+    +decimal avg_rating
+  }
+  class Chapter {
+    +int id
+    +int novel_id
+    +int chapter_number
+    +string title
+    +string content
+    +ChapterStatus status
+  }
+  class Category {
+    +int id
+    +string name
+    +string slug
+  }
+  class Tag {
+    +int id
+    +string name
+    +string slug
+  }
+  class Comment {
+    +int id
+    +int user_id
+    +int chapter_id
+    +string content
+  }
+  class Rating {
+    +int id
+    +int user_id
+    +int novel_id
+    +int score
+    +string review
+  }
+  class Bookmark {
+    +int id
+    +int user_id
+    +int novel_id
+    +int last_chapter_id
+  }
+  class ReadingHistory {
+    +int id
+    +int user_id
+    +int novel_id
+    +int chapter_id
+    +decimal progress_percent
+  }
+
+  User "1" --> "0..1" Author
+  Author "1" --> "0..*" Novel
+  Novel "1" --> "0..*" Chapter
+  Novel "*" --> "*" Category
+  Novel "*" --> "*" Tag
+  User "1" --> "0..*" Comment
+  Chapter "1" --> "0..*" Comment
+  User "1" --> "0..*" Rating
+  Novel "1" --> "0..*" Rating
+  User "1" --> "0..*" Bookmark
+  Novel "1" --> "0..*" Bookmark
+  User "1" --> "0..*" ReadingHistory
+  Novel "1" --> "0..*" ReadingHistory
+  Chapter "1" --> "0..*" ReadingHistory
+```
+
+## Cấu trúc NestJS
+
+- Entity: [src/entities](src/entities)
+- Module: [src/domain.module.ts](src/domain.module.ts)
+- Controller: [src/novel.controller.ts](src/novel.controller.ts)
+- Service: [src/novel.service.ts](src/novel.service.ts)
+- Provider: [src/domain.providers.ts](src/domain.providers.ts)
+
+Mỗi domain object đều có controller và service riêng: `User`, `Author`,
+`Category`, `Tag`, `Novel`, `Chapter`, `Comment`, `Rating`, `Bookmark` và
+`ReadingHistory`.
+
+## API Novel
+
+| Method | Endpoint      | Chức năng            |
+| ------ | ------------- | -------------------- |
+| GET    | `/novels`     | Lấy danh sách truyện |
+| GET    | `/novels/:id` | Lấy truyện theo mã   |
+| POST   | `/novels`     | Tạo truyện mới       |
+| DELETE | `/novels/:id` | Xóa truyện           |
+
+Các endpoint đọc và tạo tương tự được cung cấp cho `/users`, `/authors`,
+`/categories`, `/tags` và `/chapters`.
 
 ## Project setup
 
