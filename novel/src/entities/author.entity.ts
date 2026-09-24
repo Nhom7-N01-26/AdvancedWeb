@@ -1,17 +1,35 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Novel } from './novel.entity';
 
 @Entity('authors')
+@Unique(['user'])
 export class Author {
-  @PrimaryGeneratedColumn() id: number;
-  @Column({ unique: true }) user_id: number;
-  @Column({ length: 100 }) pen_name: string;
-  @Column({ type: 'text', nullable: true }) bio: string;
-  @Column({ length: 500, nullable: true }) avatar_url: string;
-  @Column({ default: 0 }) total_novels: number;
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' }) created_at: Date;
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' }) updated_at: Date;
-  @OneToOne(() => User, (user) => user.author) @JoinColumn({ name: 'user_id' }) user: User;
-  @OneToMany(() => Novel, (novel) => novel.author) novels: Novel[];
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @OneToOne(() => User, (user) => user.author, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @Column({ name: 'pen_name', length: 100 })
+  penName: string;
+
+  @Column({ type: 'text', nullable: true })
+  bio: string | null;
+
+  @Column({ name: 'avatar_url', length: 500, nullable: true })
+  avatarUrl: string | null;
+
+  @Column({ name: 'total_novels', default: 0 })
+  totalNovels: number;
+
+  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
+  updatedAt: Date;
+
+  @OneToMany(() => Novel, (novel) => novel.author)
+  novels: Novel[];
 }

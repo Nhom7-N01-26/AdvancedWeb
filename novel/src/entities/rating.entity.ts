@@ -1,16 +1,30 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Novel } from './novel.entity';
 
 @Entity('ratings')
+@Unique(['user', 'novel'])
 export class Rating {
-  @PrimaryGeneratedColumn() id: number;
-  @Column() user_id: number;
-  @Column() novel_id: number;
-  @Column() score: number;
-  @Column({ type: 'text', nullable: true }) review: string;
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' }) created_at: Date;
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' }) updated_at: Date;
-  @ManyToOne(() => User, (user) => user.ratings) @JoinColumn({ name: 'user_id' }) user: User;
-  @ManyToOne(() => Novel, (novel) => novel.ratings) @JoinColumn({ name: 'novel_id' }) novel: Novel;
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @ManyToOne(() => User, (user) => user.ratings, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @ManyToOne(() => Novel, (novel) => novel.ratings, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'novel_id' })
+  novel: Novel;
+
+  @Column({ type: 'tinyint' })
+  score: number;
+
+  @Column({ type: 'text', nullable: true })
+  review: string | null;
+
+  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
+  updatedAt: Date;
 }

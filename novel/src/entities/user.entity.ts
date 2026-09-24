@@ -1,29 +1,62 @@
-import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import { Author } from './author.entity';
+import { Comment } from './comment.entity';
+import { Rating } from './rating.entity';
+import { Bookmark } from './bookmark.entity';
+import { ReadingHistory } from './reading-history.entity';
+
+export enum UserRole {
+  ADMIN = 'admin',
+  AUTHOR = 'author',
+  READER = 'reader',
+}
 
 @Entity('users')
+@Unique(['username'])
+@Unique(['email'])
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 50, unique: true }) username: string;
-  @Column({ length: 100, unique: true }) email: string;
-  @Column({ length: 255 }) password_hash: string;
-  @Column({ length: 100 }) full_name: string;
-  @Column({ length: 500, nullable: true }) avatar_url: string;
-  @Column({ type: 'simple-enum', enum: ['admin', 'author', 'reader'], default: 'reader' }) role: 'admin' | 'author' | 'reader';
-  @Column({ default: true }) is_active: boolean;
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' }) created_at: Date;
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' }) updated_at: Date;
+  @Column({ length: 50 })
+  username: string;
 
-  @OneToOne(() => Author, (author) => author.user) author: Author;
-  @OneToMany(() => Comment, (comment) => comment.user) comments: Comment[];
-  @OneToMany(() => Rating, (rating) => rating.user) ratings: Rating[];
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.user) bookmarks: Bookmark[];
-  @OneToMany(() => ReadingHistory, (history) => history.user) reading_histories: ReadingHistory[];
+  @Column({ length: 100 })
+  email: string;
+
+  @Column({ name: 'password_hash', length: 255, select: false })
+  passwordHash: string;
+
+  @Column({ name: 'full_name', length: 100 })
+  fullName: string;
+
+  @Column({ name: 'avatar_url', length: 500, nullable: true })
+  avatarUrl: string | null;
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.READER })
+  role: UserRole;
+
+  @Column({ name: 'is_active', default: true })
+  isActive: boolean;
+
+  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
+  updatedAt: Date;
+
+  @OneToOne(() => Author, (author) => author.user)
+  author: Author;
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
+
+  @OneToMany(() => Rating, (rating) => rating.user)
+  ratings: Rating[];
+
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
+  bookmarks: Bookmark[];
+
+  @OneToMany(() => ReadingHistory, (history) => history.user)
+  readingHistory: ReadingHistory[];
 }
-
-import { Author } from './author.entity';
-import { Bookmark } from './bookmark.entity';
-import { Comment } from './comment.entity';
-import { Rating } from './rating.entity';
-import { ReadingHistory } from './reading-history.entity';
