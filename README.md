@@ -18,7 +18,7 @@
 ---
 
 ## 2. Cấu Trúc Repository
-
+---
 ```text
 AdvancedWeb/
 ├── .devcontainer/
@@ -50,45 +50,28 @@ AdvancedWeb/
 ├── package.json
 ├── sql_nhom_7.sql
 └── README.md
-
-## 3. Nội Dung Trả Lời Các Yêu Cầu
-
-### Yêu cầu 1: Môi trường chung phát triển ứng dụng (.devcontainer)
-- Nhóm đã xây dựng môi trường phát triển chung bằng công nghệ **Development Containers (`.devcontainer`)** theo hướng dẫn tại [nglthu.github.io/.devcontainer/devcontainer_commandline](https://nglthu.github.io/.devcontainer/devcontainer_commandline).
-- File [.devcontainer/devcontainer.json](.devcontainer/devcontainer.json) cấu hình:
-  - Tự động nạp Docker Compose gồm môi trường Node.js 20 LTS và MySQL 8.0.
-  - Tự động mount và nạp file `sql_nhom_7.sql` vào database khi container khởi chạy.
-  - Forward các cổng: `3000` (Web API) và `3306` (MySQL Server).
-  - Tích hợp sẵn các extension quan trọng: Prettier, ESLint, Database Client, REST Client.
-
 ---
 
-### Yêu cầu 2: File Cơ Sở Dữ Liệu (`sql_nhom_7.sql`)
-- File [sql_nhom_7.sql](sql_nhom_7.sql) tại thư mục gốc chứa toàn bộ kịch bản tạo CSDL `novel_manager`:
-  - **11 Bảng dữ liệu:** `users`, `authors`, `categories`, `tags`, `novels`, `novel_categories`, `novel_tags`, `chapters`, `comments`, `ratings`, `bookmarks`, `reading_history`.
-  - **Triggers tự động:** Cập nhật số lượng tiểu thuyết của tác giả, tổng số chương, điểm đánh giá trung bình (`avg_rating`), số lượt đánh dấu (`bookmarks`).
-  - **Dữ liệu mẫu đầy đủ:** Đã nạp sẵn tài khoản Admin, Tác giả, Độc giả, danh mục thể loại và các tiểu thuyết nổi tiếng.
+## 3. Nội dung thực hiện
 
----
-
-### Yêu cầu 3: Hệ Quản Trị Cơ Sở Dữ Liệu
-- Hệ quản trị CSDL được sử dụng: **MySQL 8.0** (chạy qua Docker Container / MySQL Service / XAMPP).
-- CSDL `novel_manager` đã được import thành công với bảng mã `utf8mb4_unicode_ci`.
-
-#### Ảnh chụp màn hình Câu 3: Hệ quản trị CSDL
-![Ảnh chụp màn hình Câu 3 - Hệ quản trị CSDL novel_manager](screenshots/cau3_database.png)
-
-*Ghi chú: Ảnh hiển thị Hệ quản trị CSDL kết nối `localhost:3306`, quản lý database `novel_manager`, cây cấu trúc bảng và dữ liệu bảng `novels`.*
-
----
-
-### Yêu cầu 4: File kết nối CSDL (`dbconnection.js`)
-- File [dbconnection.js](dbconnection.js) được cài đặt bằng thư viện `mysql2/promise` với cơ chế Connection Pool hiệu năng cao.
-- Có hàm `testConnection()` tự động kiểm tra kết nối, lấy phiên bản MySQL, tên database và in danh sách tất cả các bảng.
-- Lệnh chạy kiểm tra độc lập:
-  ```bash
-  node dbconnection.js
-  ```
+3.1. Môi trường phát triển
+Sử dụng Development Containers (.devcontainer).
+Node.js 20 LTS và MySQL 8.0 chạy bằng Docker Compose.
+Tự động nạp sql_nhom_7.sql khi khởi động.
+Forward port 3000 và 3306.
+3.2. Cơ sở dữ liệu
+File sql_nhom_7.sql tạo database novel_manager.
+Gồm 12 bảng, trigger cập nhật dữ liệu tự động và dữ liệu mẫu.
+3.3. Hệ quản trị CSDL
+Sử dụng MySQL 8.0.
+Database: novel_manager.
+Charset: utf8mb4_unicode_ci.
+3.4. Kết nối CSDL
+File dbconnection.js sử dụng mysql2/promise và Connection Pool.
+Kiểm tra phiên bản MySQL, database và danh sách bảng.
+Chạy kiểm tra:
+```bash
+node dbconnection.js
 
 #### Ảnh chụp màn hình Câu 4: Kết nối CSDL thành công
 ![Ảnh chụp màn hình Câu 4 - dbconnection.js kết nối thành công](screenshots/cau4_dbconnection.png)
