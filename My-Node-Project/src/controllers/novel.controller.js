@@ -4,12 +4,14 @@
  */
 
 const db = require('../../dbconnection');
+const { sendError, parsePagination, requireFields, requireEnum } = require('../utils/http');
 
 // [GET] /api/novels - Lấy danh sách tiểu thuyết
 exports.getAllNovels = async (req, res) => {
   try {
-    const { status, author_id, limit = 20, page = 1, search } = req.query;
-    const offset = (page - 1) * limit;
+    const { status, author_id, search } = req.query;
+    const { limit, offset } = parsePagination(req.query, { limit: 20, page: 1 });
+    requireEnum(status, 'status', ['draft', 'ongoing', 'completed', 'hiatus']);
 
     let query = `
       SELECT n.id, n.title, n.slug, n.description, n.cover_image, n.status,
@@ -51,7 +53,7 @@ exports.getAllNovels = async (req, res) => {
       data: novels
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -106,29 +108,33 @@ exports.getNovelById = async (req, res) => {
       data: novel
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
 // [POST] /api/novels - Tạo tiểu thuyết mới
 exports.createNovel = async (req, res) => {
+  let connection;
   try {
     const { author_id, title, slug, description, cover_image = null, status = 'draft', category_ids = [], tag_ids = [] } = req.body;
-
-    if (!author_id || !title || !slug) {
-      return res.status(400).json({
-        success: false,
-        message: 'Vui lòng cung cấp đầy đủ author_id, title và slug'
-      });
+    requireFields(req.body, ['author_id', 'title', 'slug']);
+    requireEnum(status, 'status', ['draft', 'ongoing', 'completed', 'hiatus']);
+    if (!Array.isArray(category_ids) || !Array.isArray(tag_ids)) {
+      return res.status(400).json({ success: false, message: 'category_ids và tag_ids phải là mảng' });
     }
 
-    // Kiểm tra author tồn tại
-    const [authors] = await db.query('SELECT id FROM authors WHERE id = ?', [author_id]);
+    const authorQuery = req.user.role === 'admin'
+      ? 'SELECT id FROM authors WHERE id = ?'
+      : 'SELECT id FROM authors WHERE id = ? AND user_id = ?';
+    const authorParams = req.user.role === 'admin' ? [author_id] : [author_id, req.user.id];
+    const [authors] = await db.query(authorQuery, authorParams);
     if (authors.length === 0) {
-      return res.status(400).json({ success: false, message: 'Tác giả không tồn tại' });
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền sử dụng tác giả này' });
     }
 
-    const [result] = await db.query(`
+    connection = await db.pool.getConnection();
+    await connection.beginTransaction();
+    const [result] = await connection.query(`
       INSERT INTO novels (author_id, title, slug, description, cover_image, status, published_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `, [author_id, title, slug, description, cover_image, status, status === 'ongoing' || status === 'completed' ? new Date() : null]);
@@ -138,16 +144,18 @@ exports.createNovel = async (req, res) => {
     // Gán danh mục nếu có
     if (Array.isArray(category_ids) && category_ids.length > 0) {
       for (const catId of category_ids) {
-        await db.query('INSERT IGNORE INTO novel_categories (novel_id, category_id) VALUES (?, ?)', [novelId, catId]);
+        await connection.query('INSERT INTO novel_categories (novel_id, category_id) VALUES (?, ?)', [novelId, catId]);
       }
     }
 
     // Gán tags nếu có
     if (Array.isArray(tag_ids) && tag_ids.length > 0) {
       for (const tagId of tag_ids) {
-        await db.query('INSERT IGNORE INTO novel_tags (novel_id, tag_id) VALUES (?, ?)', [novelId, tagId]);
+        await connection.query('INSERT INTO novel_tags (novel_id, tag_id) VALUES (?, ?)', [novelId, tagId]);
       }
     }
+
+    await connection.commit();
 
     res.status(201).json({
       success: true,
@@ -155,7 +163,10 @@ exports.createNovel = async (req, res) => {
       data: { id: novelId, title, slug, status }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    if (connection) await connection.rollback();
+    return sendError(res, error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
@@ -165,9 +176,13 @@ exports.updateNovel = async (req, res) => {
     const { id } = req.params;
     const { title, slug, description, cover_image, status, is_featured } = req.body;
 
-    const [existing] = await db.query('SELECT id FROM novels WHERE id = ?', [id]);
+    const existingQuery = req.user.role === 'admin'
+      ? 'SELECT id FROM novels WHERE id = ?'
+      : 'SELECT n.id FROM novels n JOIN authors a ON a.id = n.author_id WHERE n.id = ? AND a.user_id = ?';
+    const existingParams = req.user.role === 'admin' ? [id] : [id, req.user.id];
+    const [existing] = await db.query(existingQuery, existingParams);
     if (existing.length === 0) {
-      return res.status(404).json({ success: false, message: `Không tìm thấy tiểu thuyết có ID = ${id}` });
+      return res.status(404).json({ success: false, message: 'Không tìm thấy tiểu thuyết hoặc bạn không có quyền truy cập' });
     }
 
     const updates = [];
@@ -177,6 +192,7 @@ exports.updateNovel = async (req, res) => {
     if (slug !== undefined) { updates.push('slug = ?'); params.push(slug); }
     if (description !== undefined) { updates.push('description = ?'); params.push(description); }
     if (cover_image !== undefined) { updates.push('cover_image = ?'); params.push(cover_image); }
+    requireEnum(status, 'status', ['draft', 'ongoing', 'completed', 'hiatus']);
     if (status !== undefined) { updates.push('status = ?'); params.push(status); }
     if (is_featured !== undefined) { updates.push('is_featured = ?'); params.push(is_featured); }
 
@@ -193,7 +209,7 @@ exports.updateNovel = async (req, res) => {
       updated_id: id
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -202,9 +218,13 @@ exports.deleteNovel = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [existing] = await db.query('SELECT id, title FROM novels WHERE id = ?', [id]);
+    const existingQuery = req.user.role === 'admin'
+      ? 'SELECT id, title FROM novels WHERE id = ?'
+      : 'SELECT n.id, n.title FROM novels n JOIN authors a ON a.id = n.author_id WHERE n.id = ? AND a.user_id = ?';
+    const existingParams = req.user.role === 'admin' ? [id] : [id, req.user.id];
+    const [existing] = await db.query(existingQuery, existingParams);
     if (existing.length === 0) {
-      return res.status(404).json({ success: false, message: `Không tìm thấy tiểu thuyết có ID = ${id}` });
+      return res.status(404).json({ success: false, message: 'Không tìm thấy tiểu thuyết hoặc bạn không có quyền truy cập' });
     }
 
     await db.query('DELETE FROM novels WHERE id = ?', [id]);
@@ -214,6 +234,6 @@ exports.deleteNovel = async (req, res) => {
       message: `Đã xóa tiểu thuyết '${existing[0].title}' (ID = ${id}) thành công`
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };

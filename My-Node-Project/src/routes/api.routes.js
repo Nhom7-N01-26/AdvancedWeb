@@ -12,59 +12,65 @@ const categoryController = require('../controllers/category.controller');
 const authorController = require('../controllers/author.controller');
 const chapterController = require('../controllers/chapter.controller');
 const tagController = require('../controllers/tag.controller');
+const authController = require('../controllers/auth.controller');
+const { requireAuth, authorize } = require('../middleware/auth.middleware');
+
+router.post('/auth/register', authController.register);
+router.post('/auth/login', authController.login);
+router.get('/auth/me', requireAuth, authController.me);
 
 // ==============================
 // 1. USERS CRUD ROUTES
 // ==============================
-router.get('/users', userController.getAllUsers);
-router.get('/users/:id', userController.getUserById);
-router.post('/users', userController.createUser);
-router.put('/users/:id', userController.updateUser);
-router.delete('/users/:id', userController.deleteUser);
+router.get('/users', requireAuth, authorize('admin'), userController.getAllUsers);
+router.get('/users/:id', requireAuth, userController.getUserById);
+router.post('/users', requireAuth, authorize('admin'), userController.createUser);
+router.put('/users/:id', requireAuth, userController.updateUser);
+router.delete('/users/:id', requireAuth, authorize('admin'), userController.deleteUser);
 
 // ==============================
 // 2. NOVELS CRUD ROUTES
 // ==============================
 router.get('/novels', novelController.getAllNovels);
 router.get('/novels/:id', novelController.getNovelById);
-router.post('/novels', novelController.createNovel);
-router.put('/novels/:id', novelController.updateNovel);
-router.delete('/novels/:id', novelController.deleteNovel);
+router.post('/novels', requireAuth, authorize('admin', 'author'), novelController.createNovel);
+router.put('/novels/:id', requireAuth, authorize('admin', 'author'), novelController.updateNovel);
+router.delete('/novels/:id', requireAuth, authorize('admin', 'author'), novelController.deleteNovel);
 
 // ==============================
 // 3. CATEGORIES CRUD ROUTES
 // ==============================
 router.get('/categories', categoryController.getAllCategories);
 router.get('/categories/:id', categoryController.getCategoryById);
-router.post('/categories', categoryController.createCategory);
-router.put('/categories/:id', categoryController.updateCategory);
-router.delete('/categories/:id', categoryController.deleteCategory);
+router.post('/categories', requireAuth, authorize('admin'), categoryController.createCategory);
+router.put('/categories/:id', requireAuth, authorize('admin'), categoryController.updateCategory);
+router.delete('/categories/:id', requireAuth, authorize('admin'), categoryController.deleteCategory);
 
 // ==============================
 // 4. AUTHORS CRUD ROUTES
 // ==============================
 router.get('/authors', authorController.getAllAuthors);
 router.get('/authors/:id', authorController.getAuthorById);
-router.post('/authors', authorController.createAuthor);
-router.put('/authors/:id', authorController.updateAuthor);
-router.delete('/authors/:id', authorController.deleteAuthor);
+router.post('/authors', requireAuth, authorize('admin'), authorController.createAuthor);
+router.put('/authors/:id', requireAuth, authorize('admin'), authorController.updateAuthor);
+router.delete('/authors/:id', requireAuth, authorize('admin'), authorController.deleteAuthor);
 
 // ==============================
 // 5. CHAPTERS CRUD ROUTES
 // ==============================
 router.get('/chapters', chapterController.getChaptersByNovel);
 router.get('/chapters/:id', chapterController.getChapterById);
-router.post('/chapters', chapterController.createChapter);
-router.put('/chapters/:id', chapterController.updateChapter);
-router.delete('/chapters/:id', chapterController.deleteChapter);
+router.post('/chapters', requireAuth, authorize('admin', 'author'), chapterController.createChapter);
+router.put('/chapters/:id', requireAuth, authorize('admin', 'author'), chapterController.updateChapter);
+router.delete('/chapters/:id', requireAuth, authorize('admin', 'author'), chapterController.deleteChapter);
 
 // ==============================
 // 6. TAGS CRUD ROUTES
 // ==============================
 router.get('/tags', tagController.getAllTags);
 router.get('/tags/:id', tagController.getTagById);
-router.post('/tags', tagController.createTag);
-router.put('/tags/:id', tagController.updateTag);
-router.delete('/tags/:id', tagController.deleteTag);
+router.post('/tags', requireAuth, authorize('admin'), tagController.createTag);
+router.put('/tags/:id', requireAuth, authorize('admin'), tagController.updateTag);
+router.delete('/tags/:id', requireAuth, authorize('admin'), tagController.deleteTag);
 
 module.exports = router;

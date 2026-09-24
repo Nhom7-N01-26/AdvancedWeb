@@ -4,6 +4,7 @@
  */
 
 const db = require('../../dbconnection');
+const { sendError, requireFields } = require('../utils/http');
 
 // [GET] /api/authors
 exports.getAllAuthors = async (req, res) => {
@@ -17,7 +18,7 @@ exports.getAllAuthors = async (req, res) => {
     `);
     res.status(200).json({ success: true, count: authors.length, data: authors });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -42,7 +43,7 @@ exports.getAuthorById = async (req, res) => {
 
     res.status(200).json({ success: true, data: author });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -50,9 +51,7 @@ exports.getAuthorById = async (req, res) => {
 exports.createAuthor = async (req, res) => {
   try {
     const { user_id, pen_name, bio = null, avatar_url = null } = req.body;
-    if (!user_id || !pen_name) {
-      return res.status(400).json({ success: false, message: 'Vui lòng cung cấp user_id và pen_name' });
-    }
+    requireFields(req.body, ['user_id', 'pen_name']);
 
     const [result] = await db.query(
       'INSERT INTO authors (user_id, pen_name, bio, avatar_url) VALUES (?, ?, ?, ?)',
@@ -65,7 +64,7 @@ exports.createAuthor = async (req, res) => {
       data: { id: result.insertId, user_id, pen_name }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -74,10 +73,12 @@ exports.updateAuthor = async (req, res) => {
   try {
     const { id } = req.params;
     const { pen_name, bio, avatar_url } = req.body;
+    const [existing] = await db.query('SELECT id FROM authors WHERE id = ?', [id]);
+    if (existing.length === 0) return res.status(404).json({ success: false, message: 'Không tìm thấy tác giả' });
 
     const updates = [];
     const params = [];
-    if (pen_name) { updates.push('pen_name = ?'); params.push(pen_name); }
+    if (pen_name !== undefined) { updates.push('pen_name = ?'); params.push(pen_name); }
     if (bio !== undefined) { updates.push('bio = ?'); params.push(bio); }
     if (avatar_url !== undefined) { updates.push('avatar_url = ?'); params.push(avatar_url); }
 
@@ -90,7 +91,7 @@ exports.updateAuthor = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Cập nhật tác giả thành công' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -98,9 +99,11 @@ exports.updateAuthor = async (req, res) => {
 exports.deleteAuthor = async (req, res) => {
   try {
     const { id } = req.params;
+    const [existing] = await db.query('SELECT id FROM authors WHERE id = ?', [id]);
+    if (existing.length === 0) return res.status(404).json({ success: false, message: 'Không tìm thấy tác giả' });
     await db.query('DELETE FROM authors WHERE id = ?', [id]);
     res.status(200).json({ success: true, message: `Đã xóa tác giả ID = ${id} thành công` });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };

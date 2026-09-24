@@ -4,6 +4,7 @@
  */
 
 const db = require('../../dbconnection');
+const { sendError, requireFields } = require('../utils/http');
 
 // [GET] /api/tags
 exports.getAllTags = async (req, res) => {
@@ -11,7 +12,7 @@ exports.getAllTags = async (req, res) => {
     const [tags] = await db.query('SELECT * FROM tags ORDER BY id ASC');
     res.status(200).json({ success: true, count: tags.length, data: tags });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -25,7 +26,7 @@ exports.getTagById = async (req, res) => {
     }
     res.status(200).json({ success: true, data: rows[0] });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -33,9 +34,7 @@ exports.getTagById = async (req, res) => {
 exports.createTag = async (req, res) => {
   try {
     const { name, slug } = req.body;
-    if (!name || !slug) {
-      return res.status(400).json({ success: false, message: 'Vui lòng cung cấp name và slug cho tag' });
-    }
+    requireFields(req.body, ['name', 'slug']);
 
     const [result] = await db.query('INSERT INTO tags (name, slug) VALUES (?, ?)', [name, slug]);
     res.status(201).json({
@@ -44,7 +43,7 @@ exports.createTag = async (req, res) => {
       data: { id: result.insertId, name, slug }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -53,11 +52,13 @@ exports.updateTag = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, slug } = req.body;
+    const [existing] = await db.query('SELECT id FROM tags WHERE id = ?', [id]);
+    if (existing.length === 0) return res.status(404).json({ success: false, message: 'Không tìm thấy tag' });
 
     const updates = [];
     const params = [];
-    if (name) { updates.push('name = ?'); params.push(name); }
-    if (slug) { updates.push('slug = ?'); params.push(slug); }
+    if (name !== undefined) { updates.push('name = ?'); params.push(name); }
+    if (slug !== undefined) { updates.push('slug = ?'); params.push(slug); }
 
     if (updates.length === 0) {
       return res.status(400).json({ success: false, message: 'Không có dữ liệu cần cập nhật' });
@@ -68,7 +69,7 @@ exports.updateTag = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Cập nhật tag thành công' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -76,9 +77,11 @@ exports.updateTag = async (req, res) => {
 exports.deleteTag = async (req, res) => {
   try {
     const { id } = req.params;
+    const [existing] = await db.query('SELECT id FROM tags WHERE id = ?', [id]);
+    if (existing.length === 0) return res.status(404).json({ success: false, message: 'Không tìm thấy tag' });
     await db.query('DELETE FROM tags WHERE id = ?', [id]);
     res.status(200).json({ success: true, message: `Đã xóa tag ID = ${id} thành công` });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
