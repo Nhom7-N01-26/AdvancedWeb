@@ -73,6 +73,8 @@ Chạy kiểm tra:
 ```bash
 node dbconnection.js
 
+---
+
 #### Ảnh chụp màn hình Câu 4: Kết nối CSDL thành công
 ![Ảnh chụp màn hình Câu 4 - dbconnection.js kết nối thành công](screenshots/cau4_dbconnection.png)
 
