@@ -56,24 +56,44 @@ AdvancedWeb/
 
 ## 3. Nội dung thực hiện
 
-3.1. Môi trường phát triển
-Sử dụng Development Containers (.devcontainer).
-Node.js 20 LTS và MySQL 8.0 chạy bằng Docker Compose.
-Tự động nạp sql_nhom_7.sql khi khởi động.
-Forward port 3000 và 3306.
-3.2. Cơ sở dữ liệu
-File sql_nhom_7.sql tạo database novel_manager.
-Gồm 12 bảng, trigger cập nhật dữ liệu tự động và dữ liệu mẫu.
-3.3. Hệ quản trị CSDL
-Sử dụng MySQL 8.0.
-Database: novel_manager.
-Charset: utf8mb4_unicode_ci.
-3.4. Kết nối CSDL
-File dbconnection.js sử dụng mysql2/promise và Connection Pool.
-Kiểm tra phiên bản MySQL, database và danh sách bảng.
-Chạy kiểm tra:
+### 3.1. Môi trường phát triển
+
+- Sử dụng **Development Containers** (`.devcontainer`).
+- Sử dụng **Node.js 20 LTS** và **MySQL 8.0** chạy bằng Docker Compose.
+- Tự động nạp file `sql_nhom_7.sql` khi khởi động.
+- Forward port `3000` và `3306`.
+
+### 3.2. Cơ sở dữ liệu
+
+- File `sql_nhom_7.sql` tạo database `novel_manager`.
+- Gồm **12 bảng**.
+- Có **trigger cập nhật dữ liệu tự động**.
+- Có **dữ liệu mẫu** để kiểm tra.
+
+### 3.3. Hệ quản trị CSDL
+
+- Hệ quản trị: **MySQL 8.0**
+- Database: `novel_manager`
+- Charset: `utf8mb4_unicode_ci`
+
+### 3.4. Kết nối CSDL
+
+File `dbconnection.js` sử dụng:
+
+- `mysql2/promise`
+- **Connection Pool**
+
+Thực hiện kiểm tra:
+
+- Phiên bản MySQL.
+- Database đang sử dụng.
+- Danh sách các bảng.
+
+**Chạy kiểm tra:**
+
 ```bash
 node dbconnection.js
+```
 
 ---
 
