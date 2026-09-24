@@ -1,5 +1,7 @@
 # BÁO CÁO BÀI TẬP NHÓM: XÂY DỰNG PHÁT TRIỂN ỨNG DỤNG WEB NÂNG CAO
-## Đề tài: Hệ Thống Quản Lý & Đọc Tiểu Thuyết (Novel Manager) 
+
+## Đề tài: Hệ Thống Quản Lý & Đọc Tiểu Thuyết (Novel Manager)
+
 ## Nhóm 7
 
 ---
@@ -9,11 +11,12 @@
 - **Repository:** [https://github.com/Nhom7-N01-26/AdvancedWeb](https://github.com/Nhom7-N01-26/AdvancedWeb)
 
 ### Thành viên nhóm (Collaborators):
-| STT | Họ và tên | GitHub Username / Email | Vai trò & Phân công nhiệm vụ |
-|:---:|:---|:---|:---|
-| 1 | **Lê Thanh Bình** (lebinh17) | `23010242@st.phenikaa-uni.edu.vn` | Thiết kế CSDL, tạo `.sql`, cấu hình `dbconnection.js`, CRUD Novels & Categories |
-| 2 | **Trần Tiến Đức** (Elysia0533) | `23010777@st.phenikaa-uni.edu.vn` | Khởi tạo khung Express, định tuyến API, CRUD Users & Authors |
-| 3 | **Nguyễn Tiến Hoàng Vũ** (hoangsfr) | `23010233@st.phenikaa-uni.edu.vn` | Cấu hình `.devcontainer`, Docker Compose, CRUD Chapters & Tags, viết tài liệu |
+
+| STT | Họ và tên                           | GitHub Username / Email           | Vai trò & Phân công nhiệm vụ                                                    |
+| :-: | :---------------------------------- | :-------------------------------- | :------------------------------------------------------------------------------ |
+|  1  | **Lê Thanh Bình** (lebinh17)        | `23010242@st.phenikaa-uni.edu.vn` | Thiết kế CSDL, tạo `.sql`, cấu hình `dbconnection.js`, CRUD Novels & Categories |
+|  2  | **Trần Tiến Đức** (Elysia0533)      | `23010777@st.phenikaa-uni.edu.vn` | Khởi tạo khung Express, định tuyến API, CRUD Users & Authors                    |
+|  3  | **Nguyễn Tiến Hoàng Vũ** (hoangsfr) | `23010233@st.phenikaa-uni.edu.vn` | Cấu hình `.devcontainer`, Docker Compose, CRUD Chapters & Tags, viết tài liệu   |
 
 ---
 
@@ -39,7 +42,7 @@ AdvancedWeb/
 │   │   │   └── tag.controller.js
 │   │   ├── routes/
 │   │   │   └── api.routes.js
-│   │   └── entities/            
+│   │   └── entities/
 │   ├── dbconnection.js
 │   ├── index.js
 │   ├── package.json
@@ -96,48 +99,59 @@ node dbconnection.js
 ```
 
 #### Ảnh chụp màn hình 3.4: Kết nối CSDL thành công
+
 ![Ảnh chụp màn hình 3.4 - dbconnection.js kết nối thành công](screenshots/cau4_dbconnection.png)
 
-*Ghi chú: Ảnh chụp màn hình terminal thực thi `node dbconnection.js` với kết quả `[SUCCESS] Ket noi den CSDL MySQL (novel_manager) thanh cong!`.*
+_Ghi chú: Ảnh chụp màn hình terminal thực thi `node dbconnection.js` với kết quả `[SUCCESS] Ket noi den CSDL MySQL (novel_manager) thanh cong!`._
 
 ---
 
 ### Tạo CRUD cho từng đối tượng sinh viên
+
 Triển khai đầy đủ các thao tác CRUD (Create - Read - Update - Delete) bằng chuẩn RESTful API cho các thực thể:
 
-| Thực thể | Endpoint | Method | Mô tả chức năng |
-|:---|:---|:---:|:---|
-| **Users** | `/api/users` | `GET` | Lấy danh sách người dùng (lọc theo role, phân trang) |
-| | `/api/users/:id` | `GET` | Xem chi tiết người dùng theo ID |
-| | `/api/users` | `POST` | Thêm người dùng mới |
-| | `/api/users/:id` | `PUT` | Cập nhật thông tin người dùng |
-| | `/api/users/:id` | `DELETE` | Xóa người dùng |
-| **Novels** | `/api/novels` | `GET` | Lấy danh sách tiểu thuyết (tìm kiếm theo tên, thể loại) |
-| | `/api/novels/:id` | `GET` | Chi tiết tiểu thuyết kèm chương mới và danh mục |
-| | `/api/novels` | `POST` | Đăng tải tiểu thuyết mới |
-| | `/api/novels/:id` | `PUT` | Cập nhật thông tin tiểu thuyết |
-| | `/api/novels/:id` | `DELETE` | Xóa tiểu thuyết |
-| **Categories** | `/api/categories` | `GET`, `POST`, `PUT`, `DELETE` | Quản lý danh mục thể loại |
-| **Authors** | `/api/authors` | `GET`, `POST`, `PUT`, `DELETE` | Quản lý hồ sơ tác giả |
-| **Chapters** | `/api/chapters` | `GET`, `POST`, `PUT`, `DELETE` | Quản lý nội dung chương truyện |
-| **Tags** | `/api/tags` | `GET`, `POST`, `PUT`, `DELETE` | Quản lý thẻ nhãn |
+| Thực thể       | Endpoint          |             Method             | Mô tả chức năng                                         |
+| :------------- | :---------------- | :----------------------------: | :------------------------------------------------------ |
+| **Users**      | `/api/users`      |             `GET`              | Lấy danh sách người dùng (lọc theo role, phân trang)    |
+|                | `/api/users/:id`  |             `GET`              | Xem chi tiết người dùng theo ID                         |
+|                | `/api/users`      |             `POST`             | Thêm người dùng mới                                     |
+|                | `/api/users/:id`  |             `PUT`              | Cập nhật thông tin người dùng                           |
+|                | `/api/users/:id`  |            `DELETE`            | Xóa người dùng                                          |
+| **Novels**     | `/api/novels`     |             `GET`              | Lấy danh sách tiểu thuyết (tìm kiếm theo tên, thể loại) |
+|                | `/api/novels/:id` |             `GET`              | Chi tiết tiểu thuyết kèm chương mới và danh mục         |
+|                | `/api/novels`     |             `POST`             | Đăng tải tiểu thuyết mới                                |
+|                | `/api/novels/:id` |             `PUT`              | Cập nhật thông tin tiểu thuyết                          |
+|                | `/api/novels/:id` |            `DELETE`            | Xóa tiểu thuyết                                         |
+| **Categories** | `/api/categories` | `GET`, `POST`, `PUT`, `DELETE` | Quản lý danh mục thể loại                               |
+| **Authors**    | `/api/authors`    | `GET`, `POST`, `PUT`, `DELETE` | Quản lý hồ sơ tác giả                                   |
+| **Chapters**   | `/api/chapters`   | `GET`, `POST`, `PUT`, `DELETE` | Quản lý nội dung chương truyện                          |
+| **Tags**       | `/api/tags`       | `GET`, `POST`, `PUT`, `DELETE` | Quản lý thẻ nhãn                                        |
 
 #### Ảnh chụp màn hình: Kiểm thử CRUD qua Postman
+
 ![Ảnh chụp màn hình - Kiểm thử API CRUD](screenshots/cau5_crud_postman.png)
 
-*Ghi chú: Ảnh chụp màn hình giao diện Postman kiểm thử các thao tác CRUD (POST tạo mới, GET danh sách tiểu thuyết với status `200 OK`).*
+_Ghi chú: Ảnh chụp màn hình giao diện Postman kiểm thử các thao tác CRUD (POST tạo mới, GET danh sách tiểu thuyết với status `200 OK`)._
 
 ---
 
 ## 4. Hướng Dẫn Cài Đặt & Khởi Chạy
 
+### Backend chính
+
+Project sử dụng **Express + MySQL trong `My-Node-Project`** làm backend chính. Thư mục `novel` là scaffold NestJS thử nghiệm và không thuộc luồng khởi chạy hiện tại.
+
+Authentication dùng JWT. Đăng ký/đăng nhập qua `POST /api/auth/register` và `POST /api/auth/login`; các API thay đổi dữ liệu yêu cầu header `Authorization: Bearer <token>`. Role `admin` quản trị toàn bộ, role `author` chỉ thao tác trên novel/chapter của mình.
+
 ### Cách 1: Sử dụng DevContainer (Khuyên dùng - Đạt chuẩn yêu cầu 1)
+
 1. Mở thư mục dự án trong **VS Code**.
-2. Khi VS Code hiển thị thông báo *"Reopen in Container"*, nhấn chọn để mở.
+2. Khi VS Code hiển thị thông báo _"Reopen in Container"_, nhấn chọn để mở.
 3. Hoặc nhấn `F1` -> chọn `Dev Containers: Reopen in Container`.
 4. Môi trường Node.js và MySQL CSDL sẽ tự động được khởi tạo hoàn chỉnh.
 
 ### Cách 2: Khởi chạy trực tiếp (Local Machine)
+
 1. **Cài đặt thư viện:**
    ```bash
    cd My-Node-Project

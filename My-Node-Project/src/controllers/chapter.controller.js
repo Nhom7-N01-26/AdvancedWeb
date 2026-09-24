@@ -4,6 +4,7 @@
  */
 
 const db = require('../../dbconnection');
+const { sendError, requireFields, requireEnum } = require('../utils/http');
 
 // [GET] /api/chapters - Lấy danh sách chương theo novel_id
 exports.getChaptersByNovel = async (req, res) => {
@@ -20,7 +21,7 @@ exports.getChaptersByNovel = async (req, res) => {
 
     res.status(200).json({ success: true, count: chapters.length, data: chapters });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -38,7 +39,7 @@ exports.getChapterById = async (req, res) => {
 
     res.status(200).json({ success: true, data: rows[0] });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -46,11 +47,16 @@ exports.getChapterById = async (req, res) => {
 exports.createChapter = async (req, res) => {
   try {
     const { novel_id, chapter_number, title, content, status = 'published' } = req.body;
-    if (!novel_id || !chapter_number || !title || !content) {
-      return res.status(400).json({
-        success: false,
-        message: 'Vui lòng cung cấp novel_id, chapter_number, title và content'
-      });
+    requireFields(req.body, ['novel_id', 'chapter_number', 'title', 'content']);
+    requireEnum(status, 'status', ['draft', 'published']);
+
+    const novelQuery = req.user.role === 'admin'
+      ? 'SELECT id FROM novels WHERE id = ?'
+      : 'SELECT n.id FROM novels n JOIN authors a ON a.id = n.author_id WHERE n.id = ? AND a.user_id = ?';
+    const novelParams = req.user.role === 'admin' ? [novel_id] : [novel_id, req.user.id];
+    const [novels] = await db.query(novelQuery, novelParams);
+    if (novels.length === 0) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy tiểu thuyết hoặc bạn không có quyền truy cập' });
     }
 
     const word_count = content.trim().split(/\s+/).length;
@@ -67,7 +73,7 @@ exports.createChapter = async (req, res) => {
       data: { id: result.insertId, novel_id, chapter_number, title, word_count }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -77,16 +83,24 @@ exports.updateChapter = async (req, res) => {
     const { id } = req.params;
     const { title, content, status } = req.body;
 
+    const chapterQuery = req.user.role === 'admin'
+      ? 'SELECT c.id FROM chapters c WHERE c.id = ?'
+      : 'SELECT c.id FROM chapters c JOIN novels n ON n.id = c.novel_id JOIN authors a ON a.id = n.author_id WHERE c.id = ? AND a.user_id = ?';
+    const chapterParams = req.user.role === 'admin' ? [id] : [id, req.user.id];
+    const [chapters] = await db.query(chapterQuery, chapterParams);
+    if (chapters.length === 0) return res.status(404).json({ success: false, message: 'Không tìm thấy chương hoặc bạn không có quyền truy cập' });
+
     const updates = [];
     const params = [];
-    if (title) { updates.push('title = ?'); params.push(title); }
-    if (content) {
+    requireEnum(status, 'status', ['draft', 'published']);
+    if (title !== undefined) { updates.push('title = ?'); params.push(title); }
+    if (content !== undefined) {
       updates.push('content = ?');
       params.push(content);
       updates.push('word_count = ?');
       params.push(content.trim().split(/\s+/).length);
     }
-    if (status) { updates.push('status = ?'); params.push(status); }
+    if (status !== undefined) { updates.push('status = ?'); params.push(status); }
 
     if (updates.length === 0) {
       return res.status(400).json({ success: false, message: 'Không có dữ liệu cần cập nhật' });
@@ -97,7 +111,7 @@ exports.updateChapter = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Cập nhật chương thành công' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };
 
@@ -105,9 +119,15 @@ exports.updateChapter = async (req, res) => {
 exports.deleteChapter = async (req, res) => {
   try {
     const { id } = req.params;
+    const chapterQuery = req.user.role === 'admin'
+      ? 'SELECT id FROM chapters WHERE id = ?'
+      : 'SELECT c.id FROM chapters c JOIN novels n ON n.id = c.novel_id JOIN authors a ON a.id = n.author_id WHERE c.id = ? AND a.user_id = ?';
+    const chapterParams = req.user.role === 'admin' ? [id] : [id, req.user.id];
+    const [existing] = await db.query(chapterQuery, chapterParams);
+    if (existing.length === 0) return res.status(404).json({ success: false, message: 'Không tìm thấy chương' });
     await db.query('DELETE FROM chapters WHERE id = ?', [id]);
     res.status(200).json({ success: true, message: `Đã xóa chương ID = ${id} thành công` });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return sendError(res, error);
   }
 };

@@ -6,7 +6,7 @@
 
 const mysql = require('mysql2/promise');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, 'My-Node-Project', '.env') });
 
 // Khởi tạo Connection Pool kết nối MySQL
 const pool = mysql.createPool({
