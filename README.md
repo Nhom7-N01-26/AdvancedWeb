@@ -175,7 +175,7 @@ NestJS trong `novel/` là implementation chính cho Bài thực hành số 3. Ex
 
 Authentication dùng JWT. Đăng ký/đăng nhập qua `POST /api/auth/register` và `POST /api/auth/login`; các API thay đổi dữ liệu yêu cầu header `Authorization: Bearer <token>`. Role `admin` quản trị toàn bộ, role `author` chỉ thao tác trên novel/chapter của mình.
 
-### Cách 1: Sử dụng DevContainer (Khuyên dùng - Đạt chuẩn yêu cầu 1)
+### Cách 1: Sử dụng DevContainer
 
 1. Mở thư mục dự án trong **VS Code**.
 2. Khi VS Code hiển thị thông báo _"Reopen in Container"_, nhấn chọn để mở.
