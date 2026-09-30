@@ -14,9 +14,10 @@
 
 | STT | Họ và tên                           | GitHub Username / Email           | Vai trò & Phân công nhiệm vụ                                                    |
 | :-: | :---------------------------------- | :-------------------------------- | :------------------------------------------------------------------------------ |
-|  1  | **Lê Thanh Bình** (lebinh17)        | `23010242@st.phenikaa-uni.edu.vn` | Thiết kế CSDL, tạo `.sql`, cấu hình `dbconnection.js`, CRUD Novels & Categories |
-|  2  | **Trần Tiến Đức** (Elysia0533)      | `23010777@st.phenikaa-uni.edu.vn` | Khởi tạo khung Express, định tuyến API, CRUD Users & Authors                    |
-|  3  | **Nguyễn Tiến Hoàng Vũ** (hoangsfr) | `23010233@st.phenikaa-uni.edu.vn` | Cấu hình `.devcontainer`, Docker Compose, CRUD Chapters & Tags, viết tài liệu   |
+|  1  | **Lê Thanh Bình** (lebinh17)        | `23010242@st.phenikaa-uni.edu.vn` | Thiết kế CSDL, tạo sql_nhom_7.sql, cấu hình dbconnection.js, CRUD Novels & Categories |
+|  2  | **Trần Tiến Đức** (Elysia0533)      | `23010777@st.phenikaa-uni.edu.vn` | Khởi tạo Express, định tuyến API, CRUD Users & Authors |
+|  3  | **Nguyễn Tiến Hoàng Vũ** (hoangsfr) | `23010233@st.phenikaa-uni.edu.vn` | 	DevContainer, CRUD Chapters & Tags, tài liệu |
+|  4  | **Nguyễn Đức Hiếu** (...) | `23010726@st.phenikaa-uni.edu.vn` | WT Authentication, phân quyền Admin/Author, bảo vệ và kiểm thử API |
 
 ---
 
