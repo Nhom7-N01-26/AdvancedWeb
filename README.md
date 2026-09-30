@@ -167,41 +167,65 @@ API NestJS có prefix `/api`, ví dụ `GET http://localhost:3001/api/novels`. B
 
 ---
 
-## 5. Hướng Dẫn Cài Đặt & Khởi Chạy
+Đây là bản sạch, không emoji, hợp để đưa thẳng vào README:
 
-### Backend chính
+ README - Hướng Dẫn Cài Đặt & Khởi Chạy
 
-NestJS trong `novel/` là implementation chính cho Bài thực hành số 3. Express trong `My-Node-Project/` vẫn được giữ nguyên như backend tương thích ngược.
+## 5\. Hướng Dẫn Cài Đặt & Khởi Chạy
 
-Authentication dùng JWT. Đăng ký/đăng nhập qua `POST /api/auth/register` và `POST /api/auth/login`; các API thay đổi dữ liệu yêu cầu header `Authorization: Bearer <token>`. Role `admin` quản trị toàn bộ, role `author` chỉ thao tác trên novel/chapter của mình.
+ ### Backend
 
-### Cách 1: Sử dụng DevContainer
+ | Thư mục | Công nghệ | Mô tả |
+| --- | --- | --- |
+| `novel/` | NestJS | Backend chính |
+| `My-Node-Project/` | Express | Backend cũ |
 
-1. Mở thư mục dự án trong **VS Code**.
-2. Khi VS Code hiển thị thông báo _"Reopen in Container"_, nhấn chọn để mở.
-3. Hoặc nhấn `F1` -> chọn `Dev Containers: Reopen in Container`.
-4. Môi trường Node.js và MySQL CSDL sẽ tự động được khởi tạo hoàn chỉnh.
+### Authentication
 
-### Cách 2: Khởi chạy trực tiếp (Local Machine)
+ Sử dụng JWT.
 
-1. **Cài đặt thư viện:**
-   ```bash
-   cd My-Node-Project
-   npm install
-   ```
-2. **Cấu hình CSDL:**
-   - Mở MySQL và import file `sql_nhom_7.sql`.
-   - Cập nhật mật khẩu trong file `.env` (nếu có).
-3. **Kiểm tra kết nối CSDL:**
-   ```bash
-   node dbconnection.js
-   ```
-4. **Khởi động Web API Server:**
-   ```bash
-   npm start
-   ```
-5. **Truy cập ứng dụng:**
-   - Trang chủ & Danh mục API: [http://localhost:3000/](http://localhost:3000/)
-   - Kiểm tra trạng thái hệ thống: [http://localhost:3000/health](http://localhost:3000/health)
-   - Lấy danh sách tiểu thuyết: [http://localhost:3000/api/novels](http://localhost:3000/api/novels)
-   - Lấy danh sách người dùng: [http://localhost:3000/api/users](http://localhost:3000/api/users)
+ - Đăng ký: `POST /api/auth/register`
+- Đăng nhập: `POST /api/auth/login`
+- API thay đổi dữ liệu: `Authorization: Bearer <token>`
+- `admin`: toàn quyền
+- `author`: quản lý novel/chapter của mình
+
+ ### Cách 1: DevContainer
+
+ Mở project bằng VS Code → chọn **Reopen in Container**.
+
+ Node.js và MySQL được thiết lập sẵn.
+
+ ### Cách 2: Chạy Local
+
+ **1\. Cài đặt thư viện**
+
+```
+cd My-Node-Project
+npm install
+```
+
+ **2\. Cấu hình MySQL**
+
+ Import `sql_nhom_7.sql` vào MySQL và cập nhật `.env` nếu cần.
+
+ **3\. Kiểm tra kết nối**
+
+```
+node dbconnection.js
+```
+
+ **4\. Khởi động server**
+
+```
+npm start
+```
+
+ ### API
+
+ | Chức năng | URL |
+| --- | --- |
+| Trang chủ | `http://localhost:3000/` |
+| Health Check | `http://localhost:3000/health` |
+| Danh sách Novel | `http://localhost:3000/api/novels` |
+| Danh sách User | `http://localhost:3000/api/users` |
