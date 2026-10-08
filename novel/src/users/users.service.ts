@@ -1,4 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
 import { rethrowDatabaseError } from '../common/database-error';
 import { User } from '../entities';
@@ -10,6 +11,17 @@ import { USERS_REPOSITORY } from './users.provider';
 export class UsersService {
   constructor(@Inject(USERS_REPOSITORY) private readonly users: Repository<User>) {}
 
+  findByUsernameForAuthentication(username: string): Promise<User | null> {
+    return this.users.createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('user.username = :username', { username })
+      .getOne();
+  }
+
+  findActiveById(id: number): Promise<User | null> {
+    return this.users.findOne({ where: { id, isActive: true } });
+  }
+
   findAll(): Promise<User[]> {
     return this.users.find({ order: { id: 'ASC' } });
   }
@@ -20,35 +32,36 @@ export class UsersService {
     return user;
   }
 
-  async create(dto: CreateUserDto): Promise<User> {
+  async create(dto: CreateUserDto): Promise<Omit<User, 'passwordHash'>> {
     try {
-      return await this.users.save(this.users.create({
+      const user = await this.users.save(this.users.create({
         username: dto.username,
         email: dto.email,
-        passwordHash: dto.passwordHash,
+        passwordHash: await bcrypt.hash(dto.password, 12),
         fullName: dto.fullName,
         avatarUrl: dto.avatarUrl,
         role: dto.role,
         isActive: dto.isActive,
       }));
+      return this.withoutPasswordHash(user);
     } catch (error) {
       rethrowDatabaseError(error);
     }
   }
 
-  async update(id: number, dto: UpdateUserDto): Promise<User> {
+  async update(id: number, dto: UpdateUserDto): Promise<Omit<User, 'passwordHash'>> {
     const user = await this.findOne(id);
     Object.assign(user, {
       username: dto.username ?? user.username,
       email: dto.email ?? user.email,
-      passwordHash: dto.passwordHash ?? user.passwordHash,
+      passwordHash: dto.password ? await bcrypt.hash(dto.password, 12) : user.passwordHash,
       fullName: dto.fullName ?? user.fullName,
       avatarUrl: dto.avatarUrl ?? user.avatarUrl,
       role: dto.role ?? user.role,
       isActive: dto.isActive ?? user.isActive,
     });
     try {
-      return await this.users.save(user);
+      return this.withoutPasswordHash(await this.users.save(user));
     } catch (error) {
       rethrowDatabaseError(error);
     }
@@ -61,5 +74,10 @@ export class UsersService {
     } catch (error) {
       rethrowDatabaseError(error);
     }
+  }
+
+  private withoutPasswordHash(user: User): Omit<User, 'passwordHash'> {
+    const { passwordHash: _passwordHash, ...safeUser } = user;
+    return safeUser;
   }
 }

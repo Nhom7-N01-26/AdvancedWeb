@@ -1,6 +1,8 @@
 {
-  "name": "My Dev Container",
-  "image": "mcr.microsoft.com/devcontainers/base:debian",
+  "name": "AdvancedWeb",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "features": {
     "ghcr.io/devcontainers/features/node:2.1.0": {
       "version": "lts"
@@ -13,5 +15,11 @@
       ]
     }
   },
-  "postCreateCommand": "npm i -g @nestjs/cli && npm install --save @nestjs/typeorm typeorm mysql2 && npm install"
+  "forwardPorts": [3000, 3001, 3306],
+  "portsAttributes": {
+    "3000": { "label": "Express API" },
+    "3001": { "label": "NestJS API", "onAutoForward": "notify" },
+    "3306": { "label": "MySQL" }
+  },
+  "postCreateCommand": "npm install && npm install --prefix novel"
 }

@@ -5,15 +5,29 @@
  */
 
 const mysql = require('mysql2/promise');
+const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const { parsed: localEnv = {} } = require('dotenv').config({
+  path: path.join(__dirname, '.env')
+});
+const dbEnv = (name) => localEnv[name] ?? process.env[name];
+
+const sslCaPath = dbEnv('DB_SSL_CA')
+  ? path.resolve(__dirname, '..', dbEnv('DB_SSL_CA'))
+  : null;
+const ssl = sslCaPath
+  ? { ca: fs.readFileSync(sslCaPath), rejectUnauthorized: true }
+  : dbEnv('DB_SSL') === 'true'
+    ? { rejectUnauthorized: true }
+    : undefined;
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || '127.0.0.1',
-  port: parseInt(process.env.DB_PORT, 10) || 3306,
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'novel_manager',
+  host: dbEnv('DB_HOST') || '127.0.0.1',
+  port: parseInt(dbEnv('DB_PORT'), 10) || 3306,
+  user: dbEnv('DB_USER') || dbEnv('DB_USERNAME') || 'root',
+  password: dbEnv('DB_PASSWORD') || '',
+  database: dbEnv('DB_NAME') || dbEnv('DB_DATABASE') || 'novel_manager',
+  ...(ssl ? { ssl } : {}),
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -32,7 +46,7 @@ async function testConnection() {
     const [dbInfo] = await connection.query('SELECT DATABASE() AS db_name, VERSION() AS version');
     console.log(`- Database Name   : ${dbInfo[0].db_name}`);
     console.log(`- MySQL Version   : ${dbInfo[0].version}`);
-    console.log(`- Host            : ${process.env.DB_HOST || '127.0.0.1'}:${process.env.DB_PORT || 3306}`);
+    console.log(`- Host            : ${dbEnv('DB_HOST') || '127.0.0.1'}:${dbEnv('DB_PORT') || 3306}`);
 
     const [tables] = await connection.query('SHOW TABLES');
     console.log(`- Tổng số bảng    : ${tables.length} bảng`);

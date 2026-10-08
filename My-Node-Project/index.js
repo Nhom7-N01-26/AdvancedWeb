@@ -17,9 +17,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/dashboard', express.static(path.join(__dirname, 'public')));
 
-// Trang thông tin gốc & Danh sách API
 app.get('/', (req, res) => {
+  res.redirect('/dashboard/');
+});
+
+app.get('/api/docs', (req, res) => {
   res.json({
     status: 'ONLINE',
     project: 'Novel Manager RESTful API - Nhom 7 Advanced Web',

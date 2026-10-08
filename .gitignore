@@ -2,6 +2,7 @@ node_modules/
 **/node_modules/
 dist/
 .env
+My-Node-Project/certs/
 *.log
 .DS_Store
 Thumbs.db
