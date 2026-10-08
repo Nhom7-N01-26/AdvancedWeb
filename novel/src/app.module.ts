@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 import { AuthorsModule } from './authors/authors.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ChaptersModule } from './chapters/chapters.module';
@@ -13,6 +14,7 @@ import { UsersModule } from './users/users.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../.env', '../My-Node-Project/.env'] }),
     TypeOrmModule.forRootAsync(databaseProvider),
+    AuthModule,
     UsersModule,
     AuthorsModule,
     CategoriesModule,

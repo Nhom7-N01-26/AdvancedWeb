@@ -20,6 +20,21 @@ export class UsersService {
     return user;
   }
 
+  async findByEmail(email: string): Promise<User | null> {
+    return this.users
+      .createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('user.email = :email', { email })
+      .getOne();
+  }
+
+  async findByEmailOrUsername(username: string, email: string): Promise<User | null> {
+    return this.users
+      .createQueryBuilder('user')
+      .where('user.username = :username OR user.email = :email', { username, email })
+      .getOne();
+  }
+
   async create(dto: CreateUserDto): Promise<User> {
     try {
       return await this.users.save(this.users.create({
