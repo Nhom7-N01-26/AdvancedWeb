@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
-import { User } from '../entities';
+import * as bcrypt from 'bcrypt';
+import { User, UserRole } from '../entities';
 import { UsersService } from '../users/users.service';
-
-export type AuthenticatedUser = Pick<User, 'id' | 'username' | 'email' | 'fullName' | 'avatarUrl' | 'role'>;
+import { LoginDto, RegisterDto } from './auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,37 +17,73 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<AuthenticatedUser | null> {
-    const user = await this.usersService.findByUsernameForAuthentication(username);
-    if (!user || !user.isActive) return null;
-
-    try {
-      if (!(await bcrypt.compare(password, user.passwordHash))) return null;
-    } catch {
-      return null;
-    }
-
-    return this.toAuthenticatedUser(user);
-  }
-
-  login(user: AuthenticatedUser): Promise<{ access_token: string }> {
-    const payload = { sub: user.id, username: user.username, role: user.role };
-    return this.jwtService.signAsync(payload).then((access_token) => ({ access_token }));
-  }
-
-  async getActiveUser(id: number): Promise<AuthenticatedUser | null> {
-    const user = await this.usersService.findActiveById(id);
-    return user ? this.toAuthenticatedUser(user) : null;
-  }
-
-  private toAuthenticatedUser(user: User): AuthenticatedUser {
-    return {
-      id: user.id,
+  private signToken(user: Pick<User, 'id' | 'username' | 'email' | 'role'>) {
+    return this.jwtService.sign({
+      sub: user.id,
       username: user.username,
       email: user.email,
-      fullName: user.fullName,
-      avatarUrl: user.avatarUrl,
       role: user.role,
+    });
+  }
+
+  private serializeUser(user: User) {
+    const { passwordHash: _passwordHash, ...safeUser } = user;
+    return safeUser;
+  }
+
+  async register(dto: RegisterDto) {
+    const username = dto.username.trim();
+    const email = dto.email.trim().toLowerCase();
+    const fullName = dto.fullName.trim();
+
+    if (dto.password.length < 8) {
+      throw new BadRequestException('Password must be at least 8 characters long');
+    }
+
+    const existingUser = await this.usersService.findByEmailOrUsername(username, email);
+    if (existingUser) {
+      throw new ConflictException('Username or email already exists');
+    }
+
+    const user = await this.usersService.create({
+      username,
+      email,
+      password: dto.password,
+      fullName,
+      avatarUrl: dto.avatarUrl,
+      role: UserRole.READER,
+      isActive: true,
+    });
+
+    return {
+      token: this.signToken(user),
+      user,
+    };
+  }
+
+  async login(dto: LoginDto) {
+    const email = dto.email.trim().toLowerCase();
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Email or password is incorrect');
+    }
+
+    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Email or password is incorrect');
+    }
+
+    return {
+      token: this.signToken(user),
+      user: this.serializeUser(user),
+    };
+  }
+
+  async me(userId: number) {
+    const user = await this.usersService.findOne(userId);
+    return {
+      user: this.serializeUser(user),
     };
   }
 }

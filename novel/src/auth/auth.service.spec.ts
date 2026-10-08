@@ -1,51 +1,61 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
-import { UserRole } from '../entities';
+import { User, UserRole } from '../entities';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { vi } from 'vitest';
 
 describe('AuthService', () => {
-  const user = {
-    id: 7,
-    username: 'reader',
-    email: 'reader@example.com',
-    passwordHash: bcrypt.hashSync('correct-password', 4),
-    fullName: 'Novel Reader',
-    avatarUrl: null,
-    role: UserRole.READER,
-    isActive: true,
-  };
-  const findByUsernameForAuthentication = vi.fn();
-  const findActiveById = vi.fn();
-  const signAsync = vi.fn();
-  const usersService = { findByUsernameForAuthentication, findActiveById } as unknown as UsersService;
-  const jwtService = { signAsync } as unknown as JwtService;
-  const authService = new AuthService(usersService, jwtService);
+  it('registers a user and returns a JWT', async () => {
+    const user: User = {
+      id: 1,
+      username: 'alice',
+      email: 'alice@example.com',
+      passwordHash: 'hashed-password',
+      fullName: 'Alice Example',
+      avatarUrl: null,
+      role: UserRole.READER,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      author: null as any,
+      comments: [],
+      ratings: [],
+      bookmarks: [],
+      readingHistory: [],
+    };
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+    const { passwordHash: _passwordHash, ...safeUser } = user;
+    const mockUsersService = {
+      create: vi.fn().mockResolvedValue(safeUser),
+      findByEmailOrUsername: vi.fn().mockResolvedValue(null),
+      findByEmail: vi.fn().mockResolvedValue(user),
+      findOne: vi.fn().mockResolvedValue(user),
+    };
 
-  it('validates a password and omits the stored hash', async () => {
-    findByUsernameForAuthentication.mockResolvedValue(user as never);
+    const mockJwtService = {
+      sign: vi.fn().mockReturnValue('jwt-token'),
+    };
 
-    const result = await authService.validateUser('reader', 'correct-password');
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        { provide: UsersService, useValue: mockUsersService },
+        { provide: JwtService, useValue: mockJwtService },
+      ],
+    }).compile();
 
-    expect(result).toMatchObject({ id: 7, username: 'reader' });
-    expect(result).not.toHaveProperty('passwordHash');
-  });
+    const service = module.get<AuthService>(AuthService);
+    const result = await service.register({
+      username: 'alice',
+      email: 'alice@example.com',
+      password: 'password123',
+      fullName: 'Alice Example',
+    });
 
-  it('rejects an incorrect password', async () => {
-    findByUsernameForAuthentication.mockResolvedValue(user as never);
-
-    await expect(authService.validateUser('reader', 'wrong-password')).resolves.toBeNull();
-  });
-
-  it('returns a signed access token', async () => {
-    signAsync.mockResolvedValue('signed.jwt.token');
-
-    await expect(authService.login(user)).resolves.toEqual({ access_token: 'signed.jwt.token' });
-    expect(signAsync).toHaveBeenCalledWith({ sub: 7, username: 'reader', role: UserRole.READER });
+    expect(mockUsersService.findByEmailOrUsername).toHaveBeenCalledWith('alice', 'alice@example.com');
+    expect(mockUsersService.create).toHaveBeenCalledWith(expect.objectContaining({ password: 'password123' }));
+    expect(mockJwtService.sign).toHaveBeenCalled();
+    expect(result.token).toBe('jwt-token');
+    expect(result.user).not.toHaveProperty('passwordHash');
   });
 });

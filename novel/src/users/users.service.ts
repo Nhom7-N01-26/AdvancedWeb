@@ -22,6 +22,19 @@ export class UsersService {
     return this.users.findOne({ where: { id, isActive: true } });
   }
 
+  findByEmail(email: string): Promise<User | null> {
+    return this.users.createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('user.email = :email', { email })
+      .getOne();
+  }
+
+  findByEmailOrUsername(username: string, email: string): Promise<User | null> {
+    return this.users.createQueryBuilder('user')
+      .where('user.username = :username OR user.email = :email', { username, email })
+      .getOne();
+  }
+
   findAll(): Promise<User[]> {
     return this.users.find({ order: { id: 'ASC' } });
   }
