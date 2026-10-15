@@ -6,7 +6,9 @@
   "scripts": {
     "start": "cd My-Node-Project && node index.js",
     "test-db": "node dbconnection.js",
-    "dev": "cd My-Node-Project && node --watch index.js"
+    "dev": "cd My-Node-Project && node --watch index.js",
+    "frontend": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build"
   },
   "author": "Nhom 7",
   "license": "ISC",

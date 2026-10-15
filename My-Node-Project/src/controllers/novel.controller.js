@@ -237,3 +237,20 @@ exports.deleteNovel = async (req, res) => {
     return sendError(res, error);
   }
 };
+
+// [POST] /api/novels/:id/view - Tăng 1 lượt xem thực tế khi độc giả đọc chương
+exports.incrementView = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query('UPDATE novels SET total_views = total_views + 1 WHERE id = ?', [id]);
+    const [rows] = await db.query('SELECT id, total_views FROM novels WHERE id = ?', [id]);
+    res.status(200).json({
+      success: true,
+      message: 'Đã tăng 1 lượt xem thành công',
+      total_views: rows[0]?.total_views || 1
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

@@ -48,6 +48,30 @@ AdvancedWeb/
 │   ├── index.js
 │   ├── package.json
 │   └── tsconfig.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Header.jsx
+│   │   │   ├── HeroSearch.jsx
+│   │   │   ├── QuickFilters.jsx
+│   │   │   ├── CategorySection.jsx
+│   │   │   ├── NovelList.jsx
+│   │   │   ├── NovelCard.jsx
+│   │   │   ├── PlannerTabs.jsx
+│   │   │   ├── AuthorSection.jsx
+│   │   │   ├── NovelDetailModal.jsx
+│   │   │   ├── ReaderModal.jsx
+│   │   │   ├── CrudManagerModal.jsx
+│   │   │   └── Footer.jsx
+│   │   ├── data/
+│   │   │   └── initialData.js
+│   │   ├── services/
+│   │   │   └── api.js
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
 ├── .env.example
 ├── .env
 ├── dbconnection.js
@@ -191,42 +215,90 @@ API NestJS có prefix `/api`, ví dụ `GET http://localhost:3001/api/novels`. B
 - `admin`: toàn quyền
 - `author`: quản lý novel/chapter của mình
 
- ### Cách 1: DevContainer
+### Cách 1: DevContainer
 
- Mở project bằng VS Code → chọn **Reopen in Container**.
+Mở project bằng VS Code → chọn **Reopen in Container**. Node.js và MySQL được thiết lập sẵn.
 
- Node.js và MySQL được thiết lập sẵn.
+### Cách 2: Chạy Local
 
- ### Cách 2: Chạy Local
+**1. Khởi động Backend (Express)**
 
- **1\. Cài đặt thư viện**
-
-```
+```bash
 cd My-Node-Project
 npm install
-```
-
- **2\. Cấu hình MySQL**
-
- Import `sql_nhom_7.sql` vào MySQL và cập nhật `.env` nếu cần.
-
- **3\. Kiểm tra kết nối**
-
-```
 node dbconnection.js
-```
-
- **4\. Khởi động server**
-
-```
 npm start
 ```
 
- ### API
+**2. Khởi động Backend (NestJS)**
 
- | Chức năng | URL |
+```bash
+cd novel
+npm install
+npm run start:dev
+```
+
+**3. Khởi động Front-end Booking.com (React-Bootstrap)**
+
+- **Chạy trực tiếp từ thư mục gốc:**
+  ```bash
+  npm run frontend
+  ```
+- **Hoặc chạy từ thư mục `frontend/`:**
+  ```bash
+  cd frontend
+  npm install
+  npm run dev
+  ```
+- **Mở trình duyệt truy cập:** [http://localhost:5173/](http://localhost:5173/)
+
+### API & URL Reference
+
+| Chức năng | URL |
 | --- | --- |
-| Trang chủ | `http://localhost:3000/` |
+| Trang chủ Express | `http://localhost:3000/` |
 | Health Check | `http://localhost:3000/health` |
 | Danh sách Novel | `http://localhost:3000/api/novels` |
 | Danh sách User | `http://localhost:3000/api/users` |
+| NestJS API | `http://localhost:3001/api/novels` |
+| Front-end Booking | `http://localhost:5173/` |
+
+---
+
+## 6. Giao Diện Front-end Theo Chuẩn Bố Cục Booking.com (React-Bootstrap)
+
+Nhóm đã hoàn thành toàn diện giao diện Front-end cho đề tài **Hệ Thống Quản Lý & Đọc Tiểu Thuyết (Novel Manager)** tuân thủ chính xác bố cục đặc trưng của [Booking.com](https://www.booking.com/) và sử dụng thư viện **React-Bootstrap**:
+
+1. **Header & Thanh điều hướng:**
+   - Gam màu xanh Navy đặc trưng của Booking (`#003580`), thương hiệu `NovelBooking.vn` với logo `.vn` nổi bật.
+   - Thanh tiện ích: Ngôn ngữ (🇻🇳 Tiếng Việt), Bộ chuyển đổi vai trò Demo (Admin, Tác giả, Độc giả).
+   - Nút tắt *"Đăng truyện mới"* và *"Quản lý tác phẩm"* truy cập trực tiếp.
+   - Thanh Tabs điều hướng: *Tất cả tiểu thuyết*, *Thể loại truyện*, *Bảng xếp hạng Hot*, *Tác giả nổi tiếng*, *Tủ sách của tôi*, *Quản lý tác phẩm*.
+2. **Hero Banner & Thanh tìm kiếm màu vàng (Signature Floating Search Bar):**
+   - Tiêu đề chào đón chuẩn Booking: *"Tìm kiếm tiểu thuyết tiếp theo của bạn"*.
+   - Khung tìm kiếm màu vàng viền đặc trưng (`#febb02`) gồm 4 khối liền kề:
+     - 🔍 Nhập từ khóa (Tên truyện, nhân vật, tác giả...).
+     - 🏷️ Chọn thể loại (Tiên Hiệp, Kiếm Hiệp, Đô Thị, Huyền Huyễn, Võng Du...).
+     - 📊 Chọn tình trạng (Tất cả, Đã hoàn thành Full, Đang ra chương...).
+     - 🔘 Nút *"Tìm kiếm"* xanh lam Booking (`#006ce4`).
+3. **Genius Reader Banner & Thanh tiếp tục đọc:**
+   - Phù hiệu độc giả thân thiết *Genius Reader* (giảm 10-20% chương VIP).
+   - Thanh tiến độ đọc truyện dở dang với nút *"Đọc tiếp"* một chạm.
+4. **Khám phá theo thể loại truyện (Browse by Property Type):**
+   - Lưới thẻ thể loại với ảnh bìa, số lượng tác phẩm trong CSDL (`sql_nhom_7.sql`) và tính năng lọc tức thì khi bấm chọn.
+5. **Danh sách thẻ tiểu thuyết & Bộ lọc bên trái (Property Cards & Filter Sidebar):**
+   - **Thanh lọc bên trái:** Lọc theo Thể loại, Tình trạng (Full / Ongoing), Điểm đánh giá (9.5+ Xuất sắc, 9.0+ Rất tốt), Đề cử.
+   - **Thẻ tiểu thuyết Booking:** Ảnh bìa tỉ lệ 3:4, phù hiệu Genius/Full/Hot, nút thả tim lưu tủ sách, điểm số Booking (`9.9 / 10 Kiệt tác xuất sắc` trong ô xanh navy), thông tin tác giả đã xác minh, chương mới nhất, nút *"Đọc ngay"* và *"Xem chi tiết"*.
+6. **Lên kế hoạch đọc truyện (Quick Reading Planner):**
+   - Bộ Tab chọn tâm trạng đọc: *Tu Tiên Cày Cấp*, *Nhiệt Huyết Giang Hồ*, *Đô Thị Thần Y*, *eSports & Võng Du*.
+7. **Tác giả nổi tiếng (Author Spotlight):**
+   - Hồ sơ tác giả chuẩn từ database (Mặc Hương Đồng Xứ, Thiên Tàm Thổ Đậu, Vong Ngữ, Hồ Điệp Lam) kèm lượt đọc, số tác phẩm, đánh giá và nút xem toàn bộ tác phẩm.
+8. **Cửa sổ đọc truyện tương tác (Chapter Reader Modal):**
+   - Giao diện đọc toàn màn hình với nội dung chương trích từ `sql_nhom_7.sql`.
+   - Điều khiển phong phú: Chuyển chương nhanh, tăng giảm cỡ chữ (`A-` / `A+`), đổi 3 chế độ nền (*Sáng*, *Giấy cổ - Sepia*, *Ban đêm - Dark*).
+9. **Bảng điều khiển Quản Lý Tác Phẩm (CRUD Management Panel):**
+   - Đầy đủ 4 thao tác CRUD theo đúng yêu cầu đề tài: Thêm truyện mới, Xem chi tiết, Sửa thông tin truyện, Xóa truyện, Thêm chương mới.
+   - Cơ chế tự động đồng bộ API RESTful `:3000` và dự phòng LocalStorage thông minh, đảm bảo giao diện luôn hoạt động ổn định 100%.
+10. **Chân trang đa cột (Multi-column Footer):**
+    - Hộp đăng ký nhận thông báo chương mới (Newsletter).
+    - Các liên kết thể loại, tác giả, điều khoản và bảng thông tin thành viên **Nhóm 7**.

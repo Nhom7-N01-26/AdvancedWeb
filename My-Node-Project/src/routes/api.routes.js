@@ -32,8 +32,8 @@ router.delete('/users/:id', requireAuth, authorize('admin'), userController.dele
 // 2. NOVELS CRUD ROUTES
 // ==============================
 router.get('/novels', novelController.getAllNovels);
-router.get('/novels/:id', novelController.getNovelById);
 router.post('/novels', requireAuth, authorize('admin', 'author'), novelController.createNovel);
+router.post('/novels/:id/view', novelController.incrementView);
 router.put('/novels/:id', requireAuth, authorize('admin', 'author'), novelController.updateNovel);
 router.delete('/novels/:id', requireAuth, authorize('admin', 'author'), novelController.deleteNovel);
 
