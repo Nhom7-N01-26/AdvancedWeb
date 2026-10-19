@@ -39,9 +39,8 @@ export default function Header({
           <div className="d-flex align-items-center gap-2 flex-wrap">
             {/* Backend status indicator */}
             <span
-              className={`badge d-flex align-items-center gap-1 ${
-                backendStatus.isOnline ? 'bg-success' : 'bg-secondary'
-              }`}
+              className={`badge d-flex align-items-center gap-1 ${backendStatus.isOnline ? 'bg-success' : 'bg-secondary'
+                }`}
               title={
                 backendStatus.isOnline
                   ? 'Máy chủ Express (MySQL) đang kết nối: http://localhost:3000'
