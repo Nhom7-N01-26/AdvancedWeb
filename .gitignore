@@ -29,4 +29,3 @@ Thumbs.db
 # Exclude docs, pdfs, license as requested
 *.pdf
 docs/
-LICENSE
