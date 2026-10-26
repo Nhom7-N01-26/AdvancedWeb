@@ -50,7 +50,7 @@ categories_set = {"Hàn Quốc", "Nhật Bản", "Hành Động", "Huyễn Tư�
 for folder_name in selected_folder_names:
     folder_path = os.path.join(RAW_DIR, folder_name)
     if not os.path.exists(folder_path):
-        print(f"⚠️ Bỏ qua folder không tìm thấy: {folder_name}")
+        print(f"[Warning] Bo qua folder khong tim thay: {folder_name}")
         continue
     
     # Find all epub or pdf files in this folder
@@ -61,14 +61,14 @@ for folder_name in selected_folder_names:
                 files.append(os.path.join(root, f))
     
     if not files:
-        print(f"⚠️ Không có file epub/pdf trong: {folder_name}")
+        print(f"[Warning] Khong co file epub/pdf trong: {folder_name}")
         continue
     
     # Sort files and take the primary volume or first few volumes
     files.sort()
     chosen_file = files[0]
     
-    print(f"\n📖 Đang xử lý: {folder_name} (File: {os.path.basename(chosen_file)})")
+    print(f"\nDang xu ly: {folder_name} (File: {os.path.basename(chosen_file)})")
     
     try:
         novel = None
@@ -102,14 +102,14 @@ for folder_name in selected_folder_names:
                 
             authors_set.add(novel['author'])
             novels_data.append(novel)
-            print(f"  ✅ Thành công: {novel['title']} | Tác giả: {novel['author']} ({len(novel['chapters'])} chương, {novel['total_words']:,} từ)")
+            print(f"  [OK] Thanh cong: {novel['title']} | Tac gia: {novel['author']} ({len(novel['chapters'])} chuong, {novel['total_words']:,} tu)")
         else:
-            print(f"  ❌ Không bóc tách được chương nào từ: {chosen_file}")
+            print(f"  [Fail] Khong boc tach duoc chuong nao tu: {chosen_file}")
     except Exception as e:
-        print(f"  ❌ Lỗi khi đọc {chosen_file}: {e}")
+        print(f"  [Error] Loi khi doc {chosen_file}: {e}")
 
 print("\n" + "=" * 60)
-print(f"🎉 Hoàn tất trích xuất: {len(novels_data)} bộ truyện thành công!")
+print(f"Hoan tat trich xuat: {len(novels_data)} bo truyen thanh cong!")
 print("=" * 60)
 
 # Save metadata json

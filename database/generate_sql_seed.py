@@ -72,14 +72,7 @@ sql_lines.append("INSERT INTO categories (id, name, slug, description, icon, nov
 cat_name_to_id = {}
 for c in categories:
     cat_name_to_id[c['name']] = c['id']
-    icon = '📚'
-    if 'Hàn' in c['name']: icon = '🇰🇷'
-    elif 'Nhật' in c['name']: icon = '🇯🇵'
-    elif 'Huyễn' in c['name']: icon = '🔮'
-    elif 'Hành Động' in c['name']: icon = '⚔️'
-    elif 'Lãng Mạn' in c['name']: icon = '💖'
-    elif 'Hài' in c['name']: icon = '😄'
-    elif 'Trọng Sinh' in c['name'] or 'Dị Giới' in c['name']: icon = '🌀'
+    icon = ''
     sql_lines.append(f"({c['id']}, {esc(c['name'])}, {esc(c['slug'])}, {esc('Thể loại ' + c['name'])}, '{icon}', 0),")
 sql_lines[-1] = sql_lines[-1][:-1] + ";\n"
 
@@ -182,4 +175,4 @@ sql_lines.append("-- HOÀN TẤT SEED DATA THÀNH CÔNG!\n")
 with open(OUTPUT_SQL, 'w', encoding='utf-8') as f:
     f.write("\n".join(sql_lines))
 
-print(f"✅ Đã tạo thành công file SQL seed: {OUTPUT_SQL} ({len(sql_lines)} dòng)")
+print(f"Da tao thanh cong file SQL seed: {OUTPUT_SQL} ({len(sql_lines)} dong)")

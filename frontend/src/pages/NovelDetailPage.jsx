@@ -179,7 +179,7 @@ export default function NovelDetailPage() {
             <div className="d-flex flex-wrap gap-2 mb-3">
               {(novel.categories || []).map((cat) => (
                 <Badge key={cat.id} bg="light" text="dark" className="border px-2 py-1 fs-7">
-                  {cat.icon || '📚'} {cat.name}
+                  {cat.name}
                 </Badge>
               ))}
               <Badge bg={novel.status === 'completed' ? 'success' : 'primary'} className="px-2 py-1 fs-7">

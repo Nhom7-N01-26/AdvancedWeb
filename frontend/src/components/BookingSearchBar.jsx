@@ -61,7 +61,7 @@ export default function BookingSearchBar({ initialKeyword = '', initialCategory 
                 <option value="">Tất cả thể loại</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.icon ? `${c.icon} ` : ''}{c.name}
+                    {c.name}
                   </option>
                 ))}
               </Form.Select>

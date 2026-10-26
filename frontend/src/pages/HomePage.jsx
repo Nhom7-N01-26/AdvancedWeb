@@ -86,10 +86,9 @@ export default function HomePage() {
                       to={`/browse?category_id=${cat.id}`}
                       className="text-decoration-none"
                     >
-                      <div className="p-3 bg-white border rounded text-center h-100 shadow-sm hover-shadow transition">
-                        <div className="fs-2 mb-1">{cat.icon || '📚'}</div>
+                      <div className="p-3 bg-white border rounded text-center h-100 shadow-sm hover-shadow transition d-flex flex-column justify-content-center">
                         <div className="fw-bold text-dark">{cat.name}</div>
-                        <div className="text-muted small">{cat.novel_count || 0} truyện</div>
+                        <div className="text-muted small mt-1">{cat.novel_count || 0} truyện</div>
                       </div>
                     </Link>
                   </Col>

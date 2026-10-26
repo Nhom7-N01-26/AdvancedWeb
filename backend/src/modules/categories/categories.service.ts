@@ -46,7 +46,7 @@ export class CategoriesService {
       name,
       slug,
       description,
-      icon: icon || '📚',
+      icon: icon || '',
     });
 
     return await this.catRepo.save(cat);

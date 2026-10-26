@@ -131,7 +131,7 @@ export default function FilterSidebar({
               type="radio"
               id={`cat-${cat.id}`}
               name="filter-cat"
-              label={`${cat.icon || '📖'} ${cat.name} (${cat.novel_count || 0})`}
+              label={`${cat.name} (${cat.novel_count || 0})`}
               checked={String(selectedCategory) === String(cat.id)}
               onChange={() => onCategoryChange(cat.id)}
               className="small mb-1"

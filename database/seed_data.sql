@@ -32,16 +32,16 @@ INSERT INTO authors (id, user_id, pen_name, bio, avatar_url, total_novels) VALUE
 -- 3. SEED CATEGORIES
 TRUNCATE TABLE categories;
 INSERT INTO categories (id, name, slug, description, icon, novel_count) VALUES
-(1, 'Dị Giới', 'di-gioi', 'Thể loại Dị Giới', '🌀', 0),
-(2, 'Huyễn Tưởng', 'huyen-tuong', 'Thể loại Huyễn Tưởng', '🔮', 0),
-(3, 'Hài Hước', 'hai-huoc', 'Thể loại Hài Hước', '😄', 0),
-(4, 'Hàn Quốc', 'han-quoc', 'Thể loại Hàn Quốc', '🇰🇷', 0),
-(5, 'Hành Động', 'hanh-dong', 'Thể loại Hành Động', '🇰🇷', 0),
-(6, 'Học Viện', 'hoc-vien', 'Thể loại Học Viện', '📚', 0),
-(7, 'Light Novel', 'light-novel', 'Thể loại Light Novel', '📚', 0),
-(8, 'Lãng Mạn', 'lang-man', 'Thể loại Lãng Mạn', '💖', 0),
-(9, 'Nhật Bản', 'nhat-ban', 'Thể loại Nhật Bản', '🇯🇵', 0),
-(10, 'Trọng Sinh', 'trong-sinh', 'Thể loại Trọng Sinh', '🌀', 0);
+(1, 'Dị Giới', 'di-gioi', 'Thể loại Dị Giới', '', 0),
+(2, 'Huyễn Tưởng', 'huyen-tuong', 'Thể loại Huyễn Tưởng', '', 0),
+(3, 'Hài Hước', 'hai-huoc', 'Thể loại Hài Hước', '', 0),
+(4, 'Hàn Quốc', 'han-quoc', 'Thể loại Hàn Quốc', '', 0),
+(5, 'Hành Động', 'hanh-dong', 'Thể loại Hành Động', '', 0),
+(6, 'Học Viện', 'hoc-vien', 'Thể loại Học Viện', '', 0),
+(7, 'Light Novel', 'light-novel', 'Thể loại Light Novel', '', 0),
+(8, 'Lãng Mạn', 'lang-man', 'Thể loại Lãng Mạn', '', 0),
+(9, 'Nhật Bản', 'nhat-ban', 'Thể loại Nhật Bản', '', 0),
+(10, 'Trọng Sinh', 'trong-sinh', 'Thể loại Trọng Sinh', '', 0);
 
 -- 4. SEED TAGS
 TRUNCATE TABLE tags;

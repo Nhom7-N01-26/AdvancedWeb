@@ -543,21 +543,21 @@ INSERT INTO authors (user_id, pen_name, bio) VALUES
 
 -- ---- Categories ----
 INSERT INTO categories (name, slug, description, icon) VALUES
-('Tiên Hiệp',      'tien-hiep',        'Truyện về tu tiên, thần tiên trong thế giới huyền ảo',                 '🌟'),
-('Kiếm Hiệp',      'kiem-hiep',        'Truyện về hiệp khách, võ lâm, giang hồ',                              '⚔️'),
-('Ngôn Tình',       'ngon-tinh',        'Truyện tình cảm lãng mạn',                                            '💕'),
-('Đô Thị',         'do-thi',           'Truyện lấy bối cảnh thành phố hiện đại',                               '🏙️'),
-('Huyền Huyễn',    'huyen-huyen',      'Truyện thần thoại, ma thuật, thế giới kỳ ảo',                          '🔮'),
-('Khoa Huyễn',     'khoa-huyen',       'Truyện khoa học viễn tưởng',                                           '🚀'),
-('Lịch Sử',        'lich-su',          'Truyện dựa trên các sự kiện lịch sử',                                  '📜'),
-('Quân Sự',        'quan-su',          'Truyện về chiến tranh, quân đội',                                       '🎖️'),
-('Kinh Dị',        'kinh-di',          'Truyện rùng rợn, kinh dị, ma quái',                                    '👻'),
-('Trinh Thám',     'trinh-tham',       'Truyện phá án, điều tra, bí ẩn',                                       '🔍'),
-('Trọng Sinh',     'trong-sinh',       'Truyện nhân vật được sống lại từ đầu',                                  '🔄'),
-('Hài Hước',       'hai-huoc',         'Truyện vui nhộn, giải trí',                                            '😂'),
-('Đam Mỹ',         'dam-my',           'Truyện tình cảm nam-nam',                                              '🌈'),
-('Nữ Cường',       'nu-cuong',         'Truyện nữ chính mạnh mẽ',                                              '💪'),
-('Võng Du',        'vong-du',          'Truyện game, thế giới ảo, MMORPG',                                      '🎮');
+('Tiên Hiệp',      'tien-hiep',        'Truyện về tu tiên, thần tiên trong thế giới huyền ảo',                 ''),
+('Kiếm Hiệp',      'kiem-hiep',        'Truyện về hiệp khách, võ lâm, giang hồ',                              ''),
+('Ngôn Tình',       'ngon-tinh',        'Truyện tình cảm lãng mạn',                                            ''),
+('Đô Thị',         'do-thi',           'Truyện lấy bối cảnh thành phố hiện đại',                               ''),
+('Huyền Huyễn',    'huyen-huyen',      'Truyện thần thoại, ma thuật, thế giới kỳ ảo',                          ''),
+('Khoa Huyễn',     'khoa-huyen',       'Truyện khoa học viễn tưởng',                                           ''),
+('Lịch Sử',        'lich-su',          'Truyện dựa trên các sự kiện lịch sử',                                  ''),
+('Quân Sự',        'quan-su',          'Truyện về chiến tranh, quân đội',                                       ''),
+('Kinh Dị',        'kinh-di',          'Truyện rùng rợn, kinh dị, ma quái',                                    ''),
+('Trinh Thám',     'trinh-tham',       'Truyện phá án, điều tra, bí ẩn',                                       ''),
+('Trọng Sinh',     'trong-sinh',       'Truyện nhân vật được sống lại từ đầu',                                  ''),
+('Hài Hước',       'hai-huoc',         'Truyện vui nhộn, giải trí',                                            ''),
+('Đam Mỹ',         'dam-my',           'Truyện tình cảm nam-nam',                                              ''),
+('Nữ Cường',       'nu-cuong',         'Truyện nữ chính mạnh mẽ',                                              ''),
+('Võng Du',        'vong-du',          'Truyện game, thế giới ảo, MMORPG',                                      '');
 
 -- ---- Tags ----
 INSERT INTO tags (name, slug) VALUES
@@ -829,7 +829,7 @@ DELIMITER ;
 -- =====================================================
 -- HOÀN TẤT
 -- =====================================================
-SELECT '✅ Database novel_manager đã được tạo thành công!' AS message;
-SELECT CONCAT('📊 Tổng số bảng: ', COUNT(*)) AS info
+SELECT 'Database novel_manager đã được tạo thành công!' AS message;
+SELECT CONCAT('Tổng số bảng: ', COUNT(*)) AS info
 FROM information_schema.tables
 WHERE table_schema = 'novel_manager' AND table_type = 'BASE TABLE';
