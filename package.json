@@ -4,9 +4,12 @@
   "description": "Novel Manager Project - Nhom 7 Advanced Web",
   "main": "dbconnection.js",
   "scripts": {
-    "start": "cd My-Node-Project && node index.js",
+    "start": "cd backend && npm run start:dev",
+    "backend": "cd backend && npm run start:dev",
+    "backend:express": "cd My-Node-Project && node index.js",
+    "backend:build": "cd backend && npm run build",
     "test-db": "node dbconnection.js",
-    "dev": "cd My-Node-Project && node --watch index.js",
+    "dev": "cd backend && npm run start:dev",
     "frontend": "cd frontend && npm run dev",
     "frontend:build": "cd frontend && npm run build"
   },
