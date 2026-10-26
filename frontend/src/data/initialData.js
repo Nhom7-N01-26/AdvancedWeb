@@ -537,7 +537,7 @@ export const STUDENT_GROUP_INFO = {
       student_id: '23010233',
       email: '23010233@st.phenikaa-uni.edu.vn',
       role: 'Thành viên',
-      tasks: 'Cấu hình .devcontainer, Docker Compose, CRUD Chapters & Tags, Reader Experience'
+      tasks: 'Cấu hình môi trường Local, CRUD Chapters & Tags, Reader Experience'
     }
   ]
 };

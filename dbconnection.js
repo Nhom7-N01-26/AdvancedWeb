@@ -70,7 +70,7 @@ async function testConnection() {
     console.error('[ERROR] Kết nối CSDL thất bại!');
     console.error('Chi tiết lỗi:', error.message);
     console.log('Vui lòng kiểm tra lại:');
-    console.log('1. MySQL server đã khởi động chưa? (XAMPP / Docker / Service)');
+    console.log('1. MySQL server đã khởi động chưa? (XAMPP / MySQL Service)');
     console.log('2. Đã import file sql_nhom_7.sql vào MySQL chưa?');
     console.log('3. Thông tin cấu hình trong file .env đã chính xác chưa?');
     return false;

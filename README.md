@@ -25,9 +25,6 @@
 
 ```text
 AdvancedWeb/
-├── .devcontainer/
-│   ├── devcontainer.json
-│   └── docker-compose.yml
 ├── screenshots/
 │   ├── cau3_database.png
 │   ├── cau4_dbconnection.png
@@ -86,10 +83,10 @@ AdvancedWeb/
 
 ### 3.1. Môi trường phát triển
 
-- Sử dụng **Development Containers** (`.devcontainer`).
-- Sử dụng **Node.js 20 LTS** và **MySQL 8.0** chạy bằng Docker Compose.
-- Tự động nạp file `sql_nhom_7.sql` khi khởi động.
-- Forward port `3000` và `3306`.
+- Chạy trực tiếp trên môi trường **Node.js cục bộ** (Local Native).
+- Sử dụng **Node.js (LTS)** và **MySQL 8.0** (cài đặt trực tiếp hoặc qua XAMPP/Laragon).
+- Cơ sở dữ liệu: `novel_manager` từ file `sql_nhom_7.sql`.
+- Các cổng dịch vụ: Backend Express (`3000`), NestJS (`3001`), Frontend Vite (`5173`).
 
 ### 3.2. Cơ sở dữ liệu
 
@@ -215,11 +212,9 @@ API NestJS có prefix `/api`, ví dụ `GET http://localhost:3001/api/novels`. B
 - `admin`: toàn quyền
 - `author`: quản lý novel/chapter của mình
 
-### Cách 1: DevContainer
+### Hướng dẫn khởi chạy Local
 
-Mở project bằng VS Code → chọn **Reopen in Container**. Node.js và MySQL được thiết lập sẵn.
-
-### Cách 2: Chạy Local
+Dự án chạy trực tiếp trên máy cục bộ mà không cần Docker:
 
 **1. Khởi động Backend (Express)**
 
