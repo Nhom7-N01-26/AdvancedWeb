@@ -1,143 +1,208 @@
-import React, { useState } from 'react';
-import { Card, Button, Badge } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import { Bookmark, Eye, BookOpen } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import axiosClient from '../api/axiosClient';
+import React from 'react';
+import { Row, Col, Badge } from 'react-bootstrap';
 
-export default function NovelCard({ novel, onBookmarkToggle, isBookmarkedInitial = false }) {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [isBookmarked, setIsBookmarked] = useState(isBookmarkedInitial);
-  const [loadingBookmark, setLoadingBookmark] = useState(false);
-
-  // Tính điểm Booking.com thang điểm 10
-  const numericRating = Number(novel.avg_rating || 4.5);
-  const bookingScore = (numericRating * 2).toFixed(1);
-
-  const getScoreLabel = (score) => {
-    if (score >= 9.0) return 'Xuất sắc';
-    if (score >= 8.0) return 'Tuyệt vời';
-    if (score >= 7.0) return 'Rất tốt';
-    return 'Tốt';
-  };
-
-  const handleBookmark = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      setLoadingBookmark(true);
-      const res = await axiosClient.post(`/bookmarks/toggle/${novel.id}`);
-      setIsBookmarked(res.isBookmarked);
-      if (onBookmarkToggle) onBookmarkToggle(novel.id, res.isBookmarked);
-    } catch (err) {
-      console.error('Lỗi khi bookmark:', err);
-    } finally {
-      setLoadingBookmark(false);
-    }
-  };
-
-  // Chuẩn hóa đường dẫn ảnh bìa
-  const coverUrl = novel.cover_image && novel.cover_image.startsWith('/public')
-    ? `http://localhost:5000${novel.cover_image}`
-    : novel.cover_image && novel.cover_image.startsWith('/assets')
-    ? `http://localhost:5000${novel.cover_image.replace('/assets', '/public')}`
-    : novel.cover_image || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400';
+export default function NovelCard({
+  novel,
+  isBookmarked,
+  rankNumber,
+  onToggleBookmark,
+  onViewDetail,
+  onReadNow
+}) {
+  const chapterCount = novel.chapters ? novel.chapters.length : (novel.total_chapters || 1);
+  const viewsCount = Number(novel.total_views) || 0;
+  const hasRating = novel.total_ratings && novel.total_ratings > 0;
 
   return (
-    <Card className="booking-novel-card shadow-sm">
-      <Link to={`/novel/${novel.slug}`} className="text-decoration-none">
-        <div className="booking-novel-cover-wrapper">
-          <img
-            src={coverUrl}
-            alt={novel.title}
-            className="booking-novel-cover"
-            loading="lazy"
-            onError={(e) => {
-              e.target.src = 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400';
+    <article className="novel-booking-card" id={`novel-${novel.id}`}>
+      <Row className="g-3">
+        {/* Left Column: Cover Image & Badges */}
+        <Col xs={12} sm={4} md={3} lg={3}>
+          <div className="novel-cover-wrapper">
+            <img
+              src={novel.cover_image}
+              alt={novel.title}
+              className="novel-cover-img"
+              loading="lazy"
+            />
+
+            {/* Status Badge */}
+            <span
+              className={`novel-badge-tag ${
+                novel.status === 'completed'
+                  ? 'badge-completed'
+                  : novel.status === 'ongoing'
+                  ? 'badge-ongoing'
+                  : 'badge-draft'
+              }`}
+            >
+              {novel.status === 'completed'
+                ? 'Đã Hoàn Thành'
+                : novel.status === 'ongoing'
+                ? 'Đang Ra'
+                : 'Bản Thảo'}
+            </span>
+
+            {/* Bookmark button */}
+            <button
+              className="novel-bookmark-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleBookmark(novel.id);
+              }}
+              title={isBookmarked ? 'Bỏ lưu truyện' : 'Lưu vào tủ sách'}
+              aria-label="Đánh dấu tiểu thuyết"
+            >
+              <i className={`bi ${isBookmarked ? 'bi-heart-fill text-danger' : 'bi-heart'}`}></i>
+            </button>
+          </div>
+        </Col>
+
+        {/* Middle Column: Details & Real Metrics */}
+        <Col xs={12} sm={8} md={6} lg={6}>
+          <div className="d-flex align-items-center gap-2 mb-1 flex-wrap">
+            {rankNumber && (
+              <span
+                className={`badge fw-bold ${
+                  rankNumber === 1
+                    ? 'bg-warning text-dark'
+                    : rankNumber === 2
+                    ? 'bg-secondary text-white'
+                    : rankNumber === 3
+                    ? 'text-white'
+                    : 'bg-light text-dark border'
+                }`}
+                style={rankNumber === 3 ? { backgroundColor: '#cd7f32' } : {}}
+              >
+                {rankNumber === 1 && <i className="bi bi-trophy-fill me-1"></i>}
+                {rankNumber === 2 && <i className="bi bi-award-fill me-1"></i>}
+                {rankNumber === 3 && <i className="bi bi-award me-1"></i>}
+                Top {rankNumber}
+              </span>
+            )}
+            {novel.is_featured && !rankNumber && (
+              <Badge bg="warning" text="dark" className="fw-bold">
+                <i className="bi bi-star-fill me-1"></i>Đề cử
+              </Badge>
+            )}
+            {/* LƯỢT XEM THỰC TẾ: Tăng +1 khi người dùng vào đọc */}
+            <span className="badge bg-light text-primary border fw-semibold">
+              <i className="bi bi-eye-fill me-1"></i>
+              {viewsCount} lượt xem
+            </span>
+            <span className="text-muted small">
+              · {chapterCount} chương
+            </span>
+          </div>
+
+          {/* Title */}
+          <a
+            href={`#novel-${novel.id}`}
+            className="novel-title-link"
+            onClick={(e) => {
+              e.preventDefault();
+              onViewDetail(novel);
             }}
-          />
-          {novel.status === 'completed' && (
-            <Badge bg="success" className="position-absolute top-0 start-0 m-2 px-2 py-1 shadow-sm">
-              Hoàn thành
-            </Badge>
-          )}
-        </div>
-      </Link>
-
-      <Card.Body className="d-flex flex-direction-column p-3">
-        {/* Rating Section - Booking Hotel Style */}
-        <div className="d-flex justify-content-between align-items-center mb-2">
-          <div>
-            <div className="booking-score-text">{getScoreLabel(Number(bookingScore))}</div>
-            <div className="booking-review-count">{novel.total_ratings || 0} lượt đánh giá</div>
-          </div>
-          <div className="booking-score-badge">
-            {bookingScore}
-          </div>
-        </div>
-
-        {/* Tiêu đề & Tác giả */}
-        <Card.Title as="h6" className="fw-bold mb-1 text-truncate" title={novel.title}>
-          <Link to={`/novel/${novel.slug}`} className="text-dark text-decoration-none">
+          >
             {novel.title}
-          </Link>
-        </Card.Title>
+          </a>
 
-        <p className="text-muted small mb-2 text-truncate">
-          Tác giả: <strong>{novel.author?.pen_name || 'Khuyết Danh'}</strong>
-        </p>
-
-        {/* Categories */}
-        <div className="d-flex flex-wrap gap-1 mb-3">
-          {(novel.categories || []).slice(0, 2).map((cat) => (
-            <span key={cat.id} className="booking-tag">
-              {cat.name}
-            </span>
-          ))}
-        </div>
-
-        {/* Stats & Actions */}
-        <div className="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center gap-2 text-muted small">
-            <span className="d-flex align-items-center gap-1" title="Lượt xem">
-              <Eye size={14} /> {(novel.total_views || 0).toLocaleString()}
-            </span>
-            <span>•</span>
-            <span title="Số chương">
-              {novel.total_chapters || 0} chương
-            </span>
+          {/* Author line */}
+          <div className="novel-author-line">
+            <i className="bi bi-person-fill text-primary"></i>
+            <span>Tác giả: <strong>{novel.author_name}</strong></span>
+            <i className="bi bi-patch-check-fill text-primary" title="Tác giả"></i>
           </div>
 
-          <div className="d-flex gap-1">
-            <Button
-              variant={isBookmarked ? 'warning' : 'outline-secondary'}
-              size="sm"
-              className="p-1 px-2"
-              onClick={handleBookmark}
-              disabled={loadingBookmark}
-              title={isBookmarked ? 'Bỏ lưu' : 'Lưu yêu thích'}
-            >
-              <Bookmark size={15} className={isBookmarked ? 'fill-current' : ''} />
-            </Button>
-            <Button
-              as={Link}
-              to={`/novel/${novel.slug}`}
-              variant="primary"
-              size="sm"
-              className="fw-semibold px-2 py-1 booking-nav-btn-gold text-dark"
-              style={{ fontSize: '0.8rem' }}
-            >
-              <BookOpen size={14} className="me-1" /> Đọc
-            </Button>
+          {/* Location line (Booking style) */}
+          <div className="novel-location-line">
+            <i className="bi bi-geo-alt-fill"></i>
+            <span>{novel.location_label || 'Bối cảnh giả tưởng'}</span>
           </div>
-        </div>
-      </Card.Body>
-    </Card>
+
+          {/* Tags / Categories */}
+          <div className="mb-2">
+            <span className="badge bg-primary-subtle text-primary border me-1">
+              {novel.category}
+            </span>
+            {novel.tags && novel.tags.slice(0, 3).map((tag, idx) => (
+              <span key={idx} className="novel-tag-chip">
+                #{tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Excerpt */}
+          <p className="text-muted small mb-2 text-truncate-2" style={{ lineHeight: '1.45' }}>
+            {novel.description}
+          </p>
+
+          {/* Booking perks / Recent update highlight */}
+          <div className="small text-success fw-medium mb-1">
+            <i className="bi bi-check-circle-fill me-1"></i>
+            {novel.discount_label || 'Đọc miễn phí toàn bộ'}
+          </div>
+
+          <div className="small text-muted">
+            <i className="bi bi-clock me-1"></i>
+            Tình trạng: <span className="text-dark fw-medium">{novel.latest_update || `${chapterCount} chương`}</span>
+          </div>
+        </Col>
+
+        {/* Right Column: Score Box & Action Buttons (Booking signature) */}
+        <Col xs={12} sm={12} md={3} lg={3}>
+          <div className="novel-action-col h-100">
+            {/* Top Score Box: Tính toán từ reviews */}
+            <div className="d-flex align-items-center justify-content-end gap-2 mb-3">
+              <div className="text-end">
+                <div className="booking-score-label">
+                  {hasRating ? novel.booking_badge : 'Chưa có đánh giá'}
+                </div>
+                <div className="booking-score-sub">
+                  {hasRating ? `${novel.total_ratings} đánh giá` : 'Chưa có nhận xét'}
+                </div>
+              </div>
+              <div
+                className={`booking-score-box ${!hasRating ? 'bg-secondary' : ''}`}
+                style={{ fontSize: hasRating ? '1.1rem' : '0.85rem' }}
+              >
+                {hasRating ? novel.booking_score?.toFixed(1) : 'Mới'}
+              </div>
+            </div>
+
+            {/* Middle chapter count & stats */}
+            <div className="my-auto py-2">
+              <div className="text-muted small">Kho nội dung</div>
+              <div className="fw-bold text-dark fs-6">
+                {chapterCount} chương hoàn chỉnh
+              </div>
+              <div className="text-success small fw-semibold">
+                ✓ Miễn phí đọc
+              </div>
+            </div>
+
+            {/* Bottom Buttons */}
+            <div className="d-flex flex-column gap-2 mt-auto">
+              <button
+                className="btn-booking-primary w-100"
+                onClick={() => onReadNow(novel)}
+                title="Đọc tác phẩm ngay"
+              >
+                <i className="bi bi-book-half"></i>
+                <span>Đọc ngay</span>
+              </button>
+
+              <button
+                className="btn-booking-secondary w-100"
+                onClick={() => onViewDetail(novel)}
+              >
+                <i className="bi bi-info-circle"></i>
+                <span>Xem chi tiết</span>
+              </button>
+            </div>
+          </div>
+        </Col>
+      </Row>
+    </article>
   );
 }
