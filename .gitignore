@@ -1,8 +1,32 @@
+﻿# Dependencies
 node_modules/
-**/node_modules/
+/.pnp
+.pnp.js
+
+# Production builds
+/dist/
 dist/
+build/
+
+# Environment Variables
 .env
-My-Node-Project/certs/
+.env.local
+*.env
+
+# Cache & Temporary Files
+.npm
+.eslintcache
+*.tsbuildinfo
+.vite/
 *.log
+
+# OS & Editor Files
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
+
+# Exclude docs, pdfs, license as requested
+*.pdf
+docs/
+LICENSE
