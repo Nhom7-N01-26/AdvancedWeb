@@ -144,14 +144,19 @@ export default function App() {
 
   // MỖI LẦN VÀO ĐỌC LÀ 1 LƯỢT XEM THỰC TẾ
   const handleReadNow = async (novel) => {
+    let fullNovel = novel;
+    if (!novel.chapters || novel.chapters.length === 0) {
+      const chaps = await apiService.getChaptersByNovelId(novel.id);
+      fullNovel = { ...novel, chapters: chaps };
+    }
     const newViews = await apiService.incrementNovelViews(novel.id);
-    const updatedNovel = { ...novel, total_views: newViews };
+    const updatedNovel = { ...fullNovel, total_views: newViews };
 
     setNovels((prev) =>
       prev.map((n) => (n.id === novel.id ? updatedNovel : n))
     );
 
-    const firstChapterId = novel.chapters?.[0]?.id || 101;
+    const firstChapterId = updatedNovel.chapters?.[0]?.id || 1;
     setReadingSession({ novel: updatedNovel, chapterId: firstChapterId });
     apiService.saveReadingProgress(novel.id, firstChapterId, 1, 10);
     setReadingHistory(apiService.getReadingHistory());
@@ -159,8 +164,13 @@ export default function App() {
   };
 
   const handleReadChapter = async (novel, chapterId) => {
+    let fullNovel = novel;
+    if (!novel.chapters || novel.chapters.length === 0) {
+      const chaps = await apiService.getChaptersByNovelId(novel.id);
+      fullNovel = { ...novel, chapters: chaps };
+    }
     const newViews = await apiService.incrementNovelViews(novel.id);
-    const updatedNovel = { ...novel, total_views: newViews };
+    const updatedNovel = { ...fullNovel, total_views: newViews };
 
     setNovels((prev) =>
       prev.map((n) => (n.id === novel.id ? updatedNovel : n))
@@ -170,10 +180,19 @@ export default function App() {
     }
 
     setReadingSession({ novel: updatedNovel, chapterId });
-    const chapterObj = novel.chapters?.find((c) => c.id === chapterId);
+    const chapterObj = updatedNovel.chapters?.find((c) => c.id === chapterId);
     apiService.saveReadingProgress(novel.id, chapterId, chapterObj?.chapter_number || 1, 100);
     setReadingHistory(apiService.getReadingHistory());
     showToast(`Đang đọc Chương ${chapterObj?.chapter_number || 1}`, 'info');
+  };
+
+  const handleViewDetail = async (novel) => {
+    let fullNovel = novel;
+    if (!novel.chapters || novel.chapters.length === 0) {
+      const chaps = await apiService.getChaptersByNovelId(novel.id);
+      fullNovel = { ...novel, chapters: chaps };
+    }
+    setDetailNovel(fullNovel);
   };
 
   const handleChapterChange = (newChapterId) => {
@@ -384,7 +403,7 @@ export default function App() {
         activeNav={activeNav}
         setActiveNav={handleNavSelect}
         onToggleBookmark={handleToggleBookmark}
-        onViewDetail={(n) => setDetailNovel(n)}
+        onViewDetail={handleViewDetail}
         onReadNow={handleReadNow}
         onResetFilters={handleResetFilters}
       />
@@ -392,7 +411,7 @@ export default function App() {
       {/* 6. Quick Trip Planner equivalent: Planner Tabs */}
       <PlannerTabs
         novels={novels}
-        onViewDetail={(n) => setDetailNovel(n)}
+        onViewDetail={handleViewDetail}
         onReadNow={handleReadNow}
       />
 
