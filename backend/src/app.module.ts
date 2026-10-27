@@ -57,6 +57,7 @@ import { AdminModule } from './modules/admin/admin.module';
         ],
         synchronize: false, // Sử dụng schema MySQL đã tạo và seed
         logging: false,
+        ssl: config.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : undefined,
       }),
     }),
     AuthModule,
