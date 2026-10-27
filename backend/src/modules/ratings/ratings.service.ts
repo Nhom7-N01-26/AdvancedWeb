@@ -53,28 +53,31 @@ export class RatingsService {
   }
 
   async upsert(userId: number, dto: UpsertRatingDto): Promise<RatingEntity> {
-    const novel = await this.novelRepo.findOne({ where: { id: dto.novel_id } });
+    const novelId = Number(dto.novel_id);
+    const scoreVal = Number(dto.rating || (dto as any).score || 5);
+    const reviewVal = dto.review_text !== undefined ? dto.review_text : ((dto as any).review || '');
+
+    const novel = await this.novelRepo.findOne({ where: { id: novelId } });
     if (!novel) {
       throw new NotFoundException('Không tìm thấy truyện');
     }
 
     let rating = await this.ratingRepo.findOne({
-      where: { novel_id: dto.novel_id, user_id: userId },
+      where: { novel_id: novelId, user_id: userId },
     });
 
     if (rating) {
-      rating.score = dto.rating;
-      if (dto.review_text !== undefined) {
-        rating.review = dto.review_text;
-      }
+      rating.score = scoreVal;
+      rating.review = reviewVal;
     } else {
       rating = this.ratingRepo.create({
-        novel_id: dto.novel_id,
+        novel_id: novelId,
         user_id: userId,
-        score: dto.rating,
-        review: dto.review_text || '',
+        score: scoreVal,
+        review: reviewVal,
       });
     }
+
 
     const savedRating = await this.ratingRepo.save(rating);
 

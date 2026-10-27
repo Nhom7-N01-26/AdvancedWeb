@@ -10,8 +10,9 @@ export default function NovelCard({
   onReadNow
 }) {
   const chapterCount = novel.chapters ? novel.chapters.length : (novel.total_chapters || 1);
-  const viewsCount = Number(novel.total_views) || 0;
-  const hasRating = novel.total_ratings && novel.total_ratings > 0;
+  const viewsCount = Math.max(0, Number(novel.total_views) || 0);
+  const hasRating = Number(novel.total_ratings) > 0 && Number(novel.avg_rating) > 0;
+
 
   return (
     <article className="novel-booking-card" id={`novel-${novel.id}`}>
@@ -152,23 +153,31 @@ export default function NovelCard({
         {/* Right Column: Score Box & Action Buttons (Booking signature) */}
         <Col xs={12} sm={12} md={3} lg={3}>
           <div className="novel-action-col h-100">
-            {/* Top Score Box: Tính toán từ reviews */}
+            {/* Top Score Box: CHỈ KHI NGƯỜI DÙNG ĐÁNH GIÁ MỚI HIỆN ĐIỂM */}
             <div className="d-flex align-items-center justify-content-end gap-2 mb-3">
               <div className="text-end">
                 <div className="booking-score-label">
                   {hasRating ? novel.booking_badge : 'Chưa có đánh giá'}
                 </div>
                 <div className="booking-score-sub">
-                  {hasRating ? `${novel.total_ratings} đánh giá` : 'Chưa có nhận xét'}
+                  {hasRating ? `${novel.total_ratings} đánh giá` : 'Chờ đánh giá đầu tiên'}
                 </div>
               </div>
-              <div
-                className={`booking-score-box ${!hasRating ? 'bg-secondary' : ''}`}
-                style={{ fontSize: hasRating ? '1.1rem' : '0.85rem' }}
-              >
-                {hasRating ? novel.booking_score?.toFixed(1) : 'Mới'}
-              </div>
+              {hasRating ? (
+                <div className="booking-score-box" style={{ fontSize: '1.1rem' }}>
+                  {novel.booking_score?.toFixed(1)}
+                </div>
+              ) : (
+                <div
+                  className="booking-score-box bg-light text-muted border"
+                  style={{ fontSize: '0.8rem', color: '#6c757d' }}
+                  title="Chưa có đánh giá nào từ độc giả"
+                >
+                  Mới
+                </div>
+              )}
             </div>
+
 
             {/* Middle chapter count & stats */}
             <div className="my-auto py-2">

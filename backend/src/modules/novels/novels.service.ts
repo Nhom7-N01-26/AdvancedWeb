@@ -95,9 +95,12 @@ export class NovelsService {
     });
   }
 
-  async findBySlug(slug: string): Promise<NovelEntity> {
+  async findBySlug(slugOrId: string): Promise<NovelEntity> {
+    const isId = /^\d+$/.test(slugOrId);
+    const whereCondition = isId ? { id: parseInt(slugOrId, 10) } : { slug: slugOrId };
+
     const novel = await this.novelRepo.findOne({
-      where: { slug },
+      where: whereCondition,
       relations: {
         author: true,
         categories: true,
@@ -107,7 +110,7 @@ export class NovelsService {
     });
 
     if (!novel) {
-      throw new NotFoundException(`Không tìm thấy truyện với đường dẫn: ${slug}`);
+      throw new NotFoundException(`Không tìm thấy truyện với đường dẫn hoặc ID: ${slugOrId}`);
     }
 
     // Sắp xếp chapters theo số thứ tự
@@ -130,6 +133,15 @@ export class NovelsService {
       throw new NotFoundException('Không tìm thấy truyện');
     }
     return novel;
+  }
+
+  async incrementViews(id: number): Promise<number> {
+    await this.novelRepo.increment({ id }, 'total_views', 1);
+    const updated = await this.novelRepo.findOne({
+      where: { id },
+      select: { id: true, total_views: true },
+    });
+    return updated ? updated.total_views : 1;
   }
 
   async create(dto: CreateNovelDto, userId: number): Promise<NovelEntity> {

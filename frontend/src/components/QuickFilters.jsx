@@ -12,6 +12,13 @@ export default function QuickFilters({
     ? novels.find(n => n.id === readingHistory[0].novel_id)
     : null;
 
+  const totalChaps = recentNovel?.chapters?.length || recentNovel?.total_chapters || 1;
+  const currentChapNum = readingHistory[0]?.chapter_number || 1;
+  const realProgress = readingHistory[0]?.progress !== undefined
+    ? readingHistory[0].progress
+    : Math.min(100, Math.max(1, Math.round((currentChapNum / totalChaps) * 100)));
+
+
   return (
     <Container className="mt-2">
       {/* Genius Loyalty Banner */}
@@ -71,12 +78,12 @@ export default function QuickFilters({
           </div>
 
           <div className="d-flex align-items-center gap-3">
-            <div style={{ width: 140 }} className="d-none d-sm-block">
+            <div style={{ width: 160 }} className="d-none d-sm-block">
               <div className="d-flex justify-content-between text-muted small mb-1">
-                <span>Tiến độ</span>
-                <span className="fw-bold">{readingHistory[0].progress || 65}%</span>
+                <span>Tiến độ (Chương {currentChapNum}/{totalChaps})</span>
+                <span className="fw-bold text-primary">{realProgress}%</span>
               </div>
-              <ProgressBar now={readingHistory[0].progress || 65} variant="primary" style={{ height: 6 }} />
+              <ProgressBar now={realProgress} variant="primary" style={{ height: 6 }} />
             </div>
 
             <Button
@@ -89,6 +96,7 @@ export default function QuickFilters({
               Đọc tiếp
             </Button>
           </div>
+
         </div>
       )}
     </Container>

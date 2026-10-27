@@ -4,7 +4,13 @@ Dự án môn học **Thiết kế Web Nâng Cao** - Khoa Công nghệ Thông ti
 
 Hệ thống được xây dựng theo kiến trúc phân lớp bảo mật (NestJS + TypeORM + MySQL 8.0) và giao diện phong cách **Booking.com** (React + react-bootstrap).
 
+### 👥 Thành Viên Nhóm 7
+- **Nguyễn Tiến Hoàng Vũ** - MSSV: `23010233`
+- **Lê Thanh Bình** - MSSV: `23010242`
+- **Trần Tiến Đức** - MSSV: `23010777`
+
 ---
+
 
 ## 1. Cấu Trúc Dự Án
 

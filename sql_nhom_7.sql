@@ -1,3 +1,12 @@
+-- =====================================================================
+-- ĐỒ ÁN MÔN HỌC: LẬP TRÌNH WEB NÂNG CAO (N01) - ĐẠI HỌC PHENIKAA
+-- ĐỀ TÀI: HỆ THỐNG QUẢN LÝ VÀ ĐỌC TIỂU THUYẾT TRỰC TUYẾN (NOVEL MANAGER)
+-- THÀNH VIÊN NHÓM 7:
+-- 1. Nguyễn Tiến Hoàng Vũ - MSSV: 23010233
+-- 2. Lê Thanh Bình        - MSSV: 23010242
+-- 3. Trần Tiến Đức        - MSSV: 23010777
+-- =====================================================================
+
 DROP DATABASE IF EXISTS novel_manager;
 
 CREATE DATABASE novel_manager

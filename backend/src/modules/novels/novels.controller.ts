@@ -44,6 +44,13 @@ export class NovelsController {
     return this.novelsService.findBySlug(slug);
   }
 
+  @Public()
+  @Post(':id/view')
+  @ApiOperation({ summary: 'Tăng 1 lượt xem thực tế khi độc giả vào đọc' })
+  incrementViews(@Param('id', ParseIntPipe) id: number) {
+    return this.novelsService.incrementViews(id);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.AUTHOR, UserRole.ADMIN)

@@ -7,33 +7,36 @@
 import { INITIAL_NOVELS, INITIAL_CATEGORIES, INITIAL_AUTHORS } from '../data/initialData';
 
 const STORAGE_KEYS = {
-  NOVELS: 'novel_manager_novels_v5', // v5 đảm bảo xoá sạch dữ liệu demo cũ
-  CATEGORIES: 'novel_manager_categories_v5',
-  AUTHORS: 'novel_manager_authors_v5',
-  BOOKMARKS: 'novel_manager_bookmarks_v5',
-  HISTORY: 'novel_manager_history_v5',
+  NOVELS: 'novel_manager_novels_v7',
+  CATEGORIES: 'novel_manager_categories_v7',
+  AUTHORS: 'novel_manager_authors_v7',
+  BOOKMARKS: 'novel_manager_bookmarks_v7',
+  HISTORY: 'novel_manager_history_v7',
 };
 
 // Dọn dẹp cache cũ nếu có
 try {
+  localStorage.removeItem('novel_manager_novels_v6');
+  localStorage.removeItem('novel_manager_novels_v5');
+  localStorage.removeItem('novel_manager_novels_v4');
   localStorage.removeItem('novel_manager_novels_v3');
   localStorage.removeItem('novel_manager_novels_v2');
-  localStorage.removeItem('novel_manager_categories_v3');
-  localStorage.removeItem('novel_manager_authors_v3');
+  localStorage.removeItem('novel_manager_history_v6');
+  localStorage.removeItem('novel_manager_history_v5');
 } catch {}
 
-// Tính toán điểm số Booking thực tế từ mảng reviews
+// Tính toán điểm số Booking thực tế từ mảng reviews (CHỈ HIỆN ĐIỂM KHI CÓ ĐÁNH GIÁ THỰC TẾ)
 export function calculateRealRating(reviews = []) {
   if (!reviews || reviews.length === 0) {
     return {
-      total_ratings: 1,
-      avg_rating: 4.8,
-      booking_score: 9.6,
-      booking_badge: 'Tuyệt vời'
+      total_ratings: 0,
+      avg_rating: 0,
+      booking_score: 0,
+      booking_badge: 'Chưa có đánh giá'
     };
   }
 
-  const sum = reviews.reduce((acc, r) => acc + Number(r.score), 0);
+  const sum = reviews.reduce((acc, r) => acc + Number(r.score || r.rating || 0), 0);
   const avg = sum / reviews.length; // Thang 1-5
   const bookingScore = avg <= 5 ? avg * 2 : avg; // Quy đổi ra thang 10 chuẩn Booking
 
@@ -75,6 +78,7 @@ function setStoredData(key, data) {
 }
 
 export const apiService = {
+  calculateRealRating,
   // Kiểm tra sức khỏe kết nối Backend
   async checkBackendHealth() {
     try {
@@ -98,14 +102,21 @@ export const apiService = {
         const rawList = result.data?.items || (Array.isArray(result.data) ? result.data : null);
         if (rawList && rawList.length > 0) {
           const mapped = rawList.map((novel) => {
-            const rawScore = Number(novel.avg_rating) || 4.8;
-            const bookingScore = rawScore <= 5 ? Number((rawScore * 2).toFixed(1)) : Number(rawScore.toFixed(1));
-            let badge = 'Tốt';
-            if (bookingScore >= 9.5) badge = 'Kiệt tác xuất sắc';
-            else if (bookingScore >= 9.0) badge = 'Tuyệt vời';
-            else if (bookingScore >= 8.0) badge = 'Rất tốt';
-            else if (bookingScore >= 7.0) badge = 'Tốt';
-            else badge = 'Bình thường';
+            const totalRatings = Number(novel.total_ratings) || 0;
+            const rawScore = Number(novel.avg_rating) || 0;
+            const hasRealRating = totalRatings > 0 && rawScore > 0;
+            const bookingScore = hasRealRating
+              ? (rawScore <= 5 ? Number((rawScore * 2).toFixed(1)) : Number(rawScore.toFixed(1)))
+              : 0;
+
+            let badge = 'Chưa có đánh giá';
+            if (hasRealRating) {
+              if (bookingScore >= 9.5) badge = 'Kiệt tác xuất sắc';
+              else if (bookingScore >= 9.0) badge = 'Tuyệt vời';
+              else if (bookingScore >= 8.0) badge = 'Rất tốt';
+              else if (bookingScore >= 7.0) badge = 'Tốt';
+              else badge = 'Bình thường';
+            }
 
             const primaryCat =
               novel.categories?.[0]?.name ||
@@ -118,7 +129,7 @@ export const apiService = {
             return {
               ...novel,
               author_id: novel.author_id || novel.author?.id || 1,
-              author_name: novel.author?.pen_name || novel.author_name || 'mangochan.site',
+              author_name: novel.author?.pen_name || novel.author_name || 'Tác giả',
               category: primaryCat,
               categories: catList,
               tags: catList,
@@ -126,7 +137,9 @@ export const apiService = {
               description: novel.description || `Bộ tiểu thuyết ${novel.title} đặc sắc, bản dịch tiếng Việt chất lượng cao.`,
               booking_score: bookingScore,
               booking_badge: badge,
-              total_views: Number(novel.total_views) || 125000,
+              total_ratings: totalRatings,
+              avg_rating: hasRealRating ? Number(rawScore.toFixed(1)) : 0,
+              total_views: Math.max(0, Number(novel.total_views) || 0),
               total_chapters: Number(novel.total_chapters) || 12,
               discount_label: novel.is_featured ? 'Booking Choice' : 'Tác phẩm chọn lọc',
               location_label: 'Kho Truyện Phenikaa',
@@ -142,6 +155,7 @@ export const apiService = {
     } catch (e) {
       console.warn('Lỗi kết nối Backend API, dùng fallback dữ liệu chuẩn CSDL:', e);
     }
+
 
     return getStoredData(STORAGE_KEYS.NOVELS, INITIAL_NOVELS);
   },
@@ -186,26 +200,63 @@ export const apiService = {
     return n?.chapters || [];
   },
 
+  // Lấy danh sách đánh giá từ Backend /api/ratings/novel/:novelId
+  async getReviewsByNovelId(novelId) {
+    try {
+      const res = await fetch(`/api/ratings/novel/${novelId}`, { signal: AbortSignal.timeout(4000) });
+      if (res.ok) {
+        const result = await res.json();
+        const data = result.data || result;
+        if (data && Array.isArray(data.items)) {
+          return data.items.map((r) => ({
+            id: r.id,
+            user: r.user?.full_name || r.user?.username || 'Độc Giả',
+            avatar:
+              r.user?.avatar_url ||
+              'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
+            score: Number(r.score),
+            date: r.created_at ? new Date(r.created_at).toLocaleDateString('vi-VN') : 'Gần đây',
+            comment: r.review
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn('Không tải được reviews từ Backend:', e);
+    }
+
+    const novels = getStoredData(STORAGE_KEYS.NOVELS, INITIAL_NOVELS);
+    const n = novels.find((x) => x.id === parseInt(novelId, 10));
+    return n?.reviews || [];
+  },
+
   // Tăng 1 lượt xem thực tế khi độc giả vào đọc chương
   async incrementNovelViews(novelId) {
     const id = parseInt(novelId, 10);
+    let updatedViews = 1;
+
+    // 1. Gửi lên Backend MySQL thực tế
+    try {
+      const res = await fetch(`/api/novels/${id}/view`, { method: 'POST' });
+      if (res.ok) {
+        const result = await res.json();
+        if (result.data !== undefined) {
+          updatedViews = Number(result.data);
+        }
+      }
+    } catch {}
+
+    // 2. Cập nhật state & bộ nhớ cục bộ
     const novels = getStoredData(STORAGE_KEYS.NOVELS, INITIAL_NOVELS);
     const index = novels.findIndex((n) => n.id === id);
-
-    let updatedViews = 1;
     if (index > -1) {
-      novels[index].total_views = (Number(novels[index].total_views) || 0) + 1;
+      novels[index].total_views = Math.max((Number(novels[index].total_views) || 0) + 1, updatedViews);
       updatedViews = novels[index].total_views;
       setStoredData(STORAGE_KEYS.NOVELS, novels);
     }
 
-    // Gửi lên Backend nếu online
-    try {
-      fetch(`/api/novels/${id}/view`, { method: 'POST' }).catch(() => {});
-    } catch {}
-
     return updatedViews;
   },
+
 
   async createNovel(novelData) {
     const novels = getStoredData(STORAGE_KEYS.NOVELS, INITIAL_NOVELS);
@@ -293,9 +344,11 @@ export const apiService = {
   },
 
   // Thêm đánh giá của độc giả
-  addReview(novelId, reviewData) {
+  // Thêm đánh giá của độc giả
+  async addReview(novelId, reviewData) {
+    const id = parseInt(novelId, 10);
     const novels = getStoredData(STORAGE_KEYS.NOVELS, INITIAL_NOVELS);
-    const index = novels.findIndex((n) => n.id === parseInt(novelId, 10));
+    const index = novels.findIndex((n) => n.id === id);
     if (index === -1) return null;
 
     if (!novels[index].reviews) novels[index].reviews = [];
@@ -316,21 +369,24 @@ export const apiService = {
 
     setStoredData(STORAGE_KEYS.NOVELS, novels);
 
-    // Gửi lên backend
+    // Gửi lên backend MySQL thực tế
     try {
-      fetch('/api/ratings', {
+      await fetch('/api/ratings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          novel_id: novelId,
+          novel_id: id,
+          rating: Number(reviewData.score),
+          review_text: reviewData.comment,
           score: Number(reviewData.score),
           review: reviewData.comment
         })
-      }).catch(() => {});
+      });
     } catch {}
 
     return novels[index];
   },
+
 
   // 2. CATEGORIES - Tải thực tế từ Backend /api/categories
   async getCategories() {
@@ -410,18 +466,24 @@ export const apiService = {
   // 5. READING HISTORY
   getReadingHistory() {
     return getStoredData(STORAGE_KEYS.HISTORY, [
-      { novel_id: 1, chapter_id: 1, chapter_number: 1, progress: 100, updated_at: '1 giờ trước' },
-      { novel_id: 3, chapter_id: 25, chapter_number: 1, progress: 50, updated_at: 'Hôm qua' }
+      { novel_id: 1, chapter_id: 1, chapter_number: 1, total_chapters: 12, progress: 8, updated_at: '1 giờ trước' },
+      { novel_id: 3, chapter_id: 25, chapter_number: 1, total_chapters: 2, progress: 50, updated_at: 'Hôm qua' }
     ]);
   },
 
-  saveReadingProgress(novelId, chapterId, chapterNumber, progress = 100) {
+  saveReadingProgress(novelId, chapterId, chapterNumber, totalChapters = 12) {
     const history = this.getReadingHistory();
     const existingIdx = history.findIndex((h) => h.novel_id === novelId);
+    const chapNum = Math.max(1, Number(chapterNumber) || 1);
+    const total = Math.max(1, Number(totalChapters) || 1);
+    // Tính phần trăm theo sát chương đang đọc thực tế: (k / N) * 100%
+    const progress = Math.min(100, Math.max(1, Math.round((chapNum / total) * 100)));
+
     const item = {
       novel_id: novelId,
       chapter_id: chapterId,
-      chapter_number: chapterNumber,
+      chapter_number: chapNum,
+      total_chapters: total,
       progress,
       updated_at: 'Vừa xong'
     };
@@ -433,6 +495,7 @@ export const apiService = {
     setStoredData(STORAGE_KEYS.HISTORY, history);
     return history;
   },
+
 
   // Thêm chương mới cho truyện
   addChapter(novelId, chapterData) {

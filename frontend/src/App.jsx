@@ -22,8 +22,25 @@ export default function App() {
   const [authors, setAuthors] = useState([]);
   const [bookmarks, setBookmarks] = useState([]);
   const [readingHistory, setReadingHistory] = useState([]);
-  const [currentUser, setCurrentUser] = useState(INITIAL_USERS[0]);
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('novel_manager_user_profile');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return INITIAL_USERS[0];
+  });
   const [backendStatus, setBackendStatus] = useState({ isOnline: false });
+
+  // Cập nhật avatar từ thư viện ảnh máy người dùng
+  const handleUpdateAvatar = (newAvatarUrl) => {
+    const updated = { ...currentUser, avatar: newAvatarUrl };
+    setCurrentUser(updated);
+    try {
+      localStorage.setItem('novel_manager_user_profile', JSON.stringify(updated));
+    } catch {}
+    showToast('Đã đổi ảnh đại diện từ thư viện thành công! ✨', 'success');
+  };
+
 
   // Navigation & Filter state
   const [activeNav, setActiveNav] = useState('novels');
@@ -157,10 +174,11 @@ export default function App() {
     );
 
     const firstChapterId = updatedNovel.chapters?.[0]?.id || 1;
+    const totalChaps = updatedNovel.chapters?.length || updatedNovel.total_chapters || 1;
     setReadingSession({ novel: updatedNovel, chapterId: firstChapterId });
-    apiService.saveReadingProgress(novel.id, firstChapterId, 1, 10);
+    apiService.saveReadingProgress(novel.id, firstChapterId, 1, totalChaps);
     setReadingHistory(apiService.getReadingHistory());
-    showToast(`Đang mở đọc "${novel.title}"`, 'info');
+    showToast(`Đang mở đọc "${novel.title}" (+1 lượt xem thực tế)`, 'info');
   };
 
   const handleReadChapter = async (novel, chapterId) => {
@@ -181,45 +199,70 @@ export default function App() {
 
     setReadingSession({ novel: updatedNovel, chapterId });
     const chapterObj = updatedNovel.chapters?.find((c) => c.id === chapterId);
-    apiService.saveReadingProgress(novel.id, chapterId, chapterObj?.chapter_number || 1, 100);
+    const chapNum = chapterObj?.chapter_number || 1;
+    const totalChaps = updatedNovel.chapters?.length || updatedNovel.total_chapters || 1;
+    apiService.saveReadingProgress(novel.id, chapterId, chapNum, totalChaps);
     setReadingHistory(apiService.getReadingHistory());
-    showToast(`Đang đọc Chương ${chapterObj?.chapter_number || 1}`, 'info');
+    showToast(`Đang đọc Chương ${chapNum} (+1 lượt xem thực tế)`, 'info');
   };
 
   const handleViewDetail = async (novel) => {
     let fullNovel = novel;
-    if (!novel.chapters || novel.chapters.length === 0) {
-      const chaps = await apiService.getChaptersByNovelId(novel.id);
-      fullNovel = { ...novel, chapters: chaps };
-    }
+    const [chaps, revs] = await Promise.all([
+      (!novel.chapters || novel.chapters.length === 0)
+        ? apiService.getChaptersByNovelId(novel.id)
+        : Promise.resolve(novel.chapters),
+      apiService.getReviewsByNovelId(novel.id)
+    ]);
+    const ratingInfo = apiService.calculateRealRating(revs);
+    fullNovel = {
+      ...novel,
+      chapters: chaps,
+      reviews: revs,
+      ...ratingInfo
+    };
     setDetailNovel(fullNovel);
   };
 
-  const handleChapterChange = (newChapterId) => {
+  const handleChapterChange = async (newChapterId) => {
     if (readingSession) {
-      setReadingSession({ ...readingSession, chapterId: newChapterId });
-      const ch = readingSession.novel.chapters?.find((c) => c.id === newChapterId);
+      // Mỗi lần chuyển chương mới là 1 lượt đọc thực tế -> tăng lượt xem
+      const newViews = await apiService.incrementNovelViews(readingSession.novel.id);
+      const updatedNovel = { ...readingSession.novel, total_views: newViews };
+      setReadingSession({ novel: updatedNovel, chapterId: newChapterId });
+
+      const ch = updatedNovel.chapters?.find((c) => c.id === newChapterId);
+      const chapNum = ch?.chapter_number || 1;
+      const totalChaps = updatedNovel.chapters?.length || updatedNovel.total_chapters || 1;
+
       apiService.saveReadingProgress(
-        readingSession.novel.id,
+        updatedNovel.id,
         newChapterId,
-        ch?.chapter_number || 1,
-        100
+        chapNum,
+        totalChaps
       );
       setReadingHistory(apiService.getReadingHistory());
+      setNovels((prev) =>
+        prev.map((n) => (n.id === updatedNovel.id ? updatedNovel : n))
+      );
+      if (detailNovel && detailNovel.id === updatedNovel.id) {
+        setDetailNovel(updatedNovel);
+      }
     }
   };
 
   // ĐÁNH GIÁ: Tính toán chuẩn từ review gửi lên
-  const handleAddReview = (novelId, reviewData) => {
-    const updatedNovel = apiService.addReview(novelId, reviewData);
+  const handleAddReview = async (novelId, reviewData) => {
+    const updatedNovel = await apiService.addReview(novelId, reviewData);
     if (updatedNovel) {
       setNovels((prev) => prev.map((n) => (n.id === novelId ? updatedNovel : n)));
       if (detailNovel && detailNovel.id === novelId) {
         setDetailNovel(updatedNovel);
       }
-      showToast('Cảm ơn bạn đã gửi đánh giá cho tác phẩm! ⭐', 'success');
+      showToast('Cảm ơn bạn đã gửi đánh giá cho tác phẩm! Điểm số đã được cập nhật ⭐', 'success');
     }
   };
+
 
   // CRUD Handlers
   const handleCreateNovel = async (newNovelData) => {
@@ -335,11 +378,13 @@ export default function App() {
         setActiveNav={handleNavSelect}
         currentUser={currentUser}
         setCurrentUser={setCurrentUser}
+        onUpdateAvatar={handleUpdateAvatar}
         bookmarkCount={bookmarks.length}
         onOpenCrud={() => setShowCrudModal(true)}
         onOpenCreateNovel={() => setShowCrudModal(true)}
         backendStatus={backendStatus}
       />
+
 
       {/* 2. Hero Section + Iconic Yellow Floating Search Bar */}
       <HeroSearch
@@ -448,6 +493,7 @@ export default function App() {
         onToggleBookmark={handleToggleBookmark}
         onReadChapter={handleReadChapter}
         onAddReview={handleAddReview}
+        currentUser={currentUser}
       />
 
       {/* MODAL 2: Full Chapter Reader (Mỗi lần đọc là 1 lượt xem) */}

@@ -8,7 +8,8 @@ export default function NovelDetailModal({
   isBookmarked,
   onToggleBookmark,
   onReadChapter,
-  onAddReview
+  onAddReview,
+  currentUser
 }) {
   const [activeTab, setActiveTab] = useState('overview'); // overview, chapters, reviews
   const [newReviewText, setNewReviewText] = useState('');
@@ -16,17 +17,20 @@ export default function NovelDetailModal({
 
   if (!novel) return null;
 
-  const hasRating = novel.total_ratings && novel.total_ratings > 0;
+  const hasRating = Number(novel.total_ratings) > 0 && Number(novel.avg_rating) > 0;
   const chapterCount = novel.chapters ? novel.chapters.length : (novel.total_chapters || 1);
-  const viewsCount = Number(novel.total_views) || 0;
+  const viewsCount = Math.max(0, Number(novel.total_views) || 0);
+
 
   const handleReviewSubmit = (e) => {
     e.preventDefault();
     if (!newReviewText.trim()) return;
     if (onAddReview) {
       onAddReview(novel.id, {
-        user: 'Bạn (Độc Giả)',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
+        user: currentUser?.full_name || 'Bạn (Độc Giả)',
+        avatar:
+          currentUser?.avatar ||
+          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
         score: Number(newRatingScore),
         date: 'Hôm nay',
         comment: newReviewText.trim()
@@ -100,22 +104,25 @@ export default function NovelDetailModal({
                   </div>
                 </div>
 
-                {/* Score badge: Số liệu tính từ reviews */}
+                {/* Score badge: CHỈ KHI CÓ ĐÁNH GIÁ MỚI HIỆN ĐIỂM */}
                 <div className="d-flex align-items-center gap-2 bg-light p-2 rounded-2 border">
                   <div className="text-end">
                     <div className="fw-bold text-dark small">
                       {hasRating ? novel.booking_badge : 'Chưa có đánh giá'}
                     </div>
                     <div className="text-muted" style={{ fontSize: '0.72rem' }}>
-                      {hasRating ? `${novel.total_ratings} đánh giá` : '0 nhận xét'}
+                      {hasRating ? `${novel.total_ratings} đánh giá` : 'Chờ đánh giá đầu tiên'}
                     </div>
                   </div>
-                  <div
-                    className={`booking-score-box ${!hasRating ? 'bg-secondary' : ''}`}
-                    style={{ fontSize: hasRating ? '1.1rem' : '0.85rem' }}
-                  >
-                    {hasRating ? novel.booking_score?.toFixed(1) : 'Mới'}
-                  </div>
+                  {hasRating ? (
+                    <div className="booking-score-box" style={{ fontSize: '1.1rem' }}>
+                      {novel.booking_score?.toFixed(1)}
+                    </div>
+                  ) : (
+                    <div className="booking-score-box bg-light text-muted border" style={{ fontSize: '0.8rem', color: '#6c757d' }}>
+                      Mới
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -136,11 +143,11 @@ export default function NovelDetailModal({
                 </Col>
                 <Col xs={4} className="border-start border-end">
                   <div className="fw-bold text-primary fs-5">{viewsCount}</div>
-                  <div className="text-muted small">Lượt xem</div>
+                  <div className="text-muted small">Lượt xem thực tế</div>
                 </Col>
                 <Col xs={4}>
                   <div className="fw-bold text-danger fs-5">
-                    {novel.reviews?.length || 0}
+                    {novel.total_ratings || novel.reviews?.length || 0}
                   </div>
                   <div className="text-muted small">Lượt đánh giá</div>
                 </Col>
@@ -157,22 +164,34 @@ export default function NovelDetailModal({
               {/* Booking-style review metrics */}
               {hasRating ? (
                 <div className="p-3 rounded-2 bg-light border">
-                  <h6 className="fw-bold text-dark small mb-2">Điểm đánh giá từ độc giả:</h6>
+                  <h6 className="fw-bold text-dark small mb-2">Điểm đánh giá thực tế từ độc giả:</h6>
                   <div className="d-flex align-items-center gap-3">
                     <div className="display-6 fw-bold text-primary">
                       {novel.booking_score?.toFixed(1)} <span className="fs-6 text-muted">/ 10</span>
                     </div>
                     <div className="small text-muted">
-                      <div>Điểm thang 5 sao: <strong>{novel.avg_rating} ⭐</strong></div>
+                      <div>Điểm trung bình thực tế: <strong>{novel.avg_rating} ⭐</strong></div>
                       <div>Dựa trên <strong>{novel.total_ratings}</strong> nhận xét đã gửi.</div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="p-3 rounded-2 bg-light border text-muted small">
-                  Tác phẩm này hiện chưa có đánh giá nào. Bạn có thể là người đầu tiên để lại nhận xét ở tab bên dưới!
+                <div className="p-3 rounded-2 bg-light border text-muted small d-flex align-items-center justify-content-between flex-wrap gap-2">
+                  <div>
+                    <i className="bi bi-star me-2 text-warning"></i>
+                    Tác phẩm này hiện chưa có đánh giá nào. Hãy là người đầu tiên trải nghiệm và chấm điểm!
+                  </div>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className="fw-bold"
+                    onClick={() => setActiveTab('reviews')}
+                  >
+                    Viết đánh giá ngay
+                  </Button>
                 </div>
               )}
+
             </Col>
           </Row>
         </div>

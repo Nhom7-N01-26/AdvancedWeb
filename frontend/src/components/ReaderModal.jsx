@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Modal, Button, Form, ProgressBar } from 'react-bootstrap';
 
 export default function ReaderModal({
   show,
@@ -16,6 +16,8 @@ export default function ReaderModal({
   // Tìm chapter hiện tại
   const currentChapter = novel.chapters.find((c) => c.id === chapterId) || novel.chapters[0];
   const currentIndex = novel.chapters.findIndex((c) => c.id === currentChapter.id);
+  const totalChaptersCount = novel.chapters.length || novel.total_chapters || 1;
+  const progressPercent = Math.min(100, Math.max(1, Math.round((currentChapter.chapter_number / totalChaptersCount) * 100)));
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < novel.chapters.length - 1;
 
@@ -58,11 +60,11 @@ export default function ReaderModal({
               <span className="d-none d-sm-inline">Trở lại</span>
             </Button>
             <div>
-              <strong className="d-block text-truncate" style={{ maxWidth: 280 }}>
+              <strong className="d-block text-truncate" style={{ maxWidth: 260 }}>
                 {novel.title}
               </strong>
               <span className="text-muted small">
-                Chương {currentChapter.chapter_number} / {novel.chapters.length}
+                Chương {currentChapter.chapter_number} / {totalChaptersCount}
               </span>
             </div>
           </div>
@@ -81,6 +83,15 @@ export default function ReaderModal({
                 </option>
               ))}
             </Form.Select>
+          </div>
+
+          {/* TIẾN ĐỘ ĐỌC PHẦN TRĂM THEO SÁT CHƯƠNG */}
+          <div className="d-none d-md-flex flex-column" style={{ minWidth: 150 }}>
+            <div className="d-flex justify-content-between text-muted" style={{ fontSize: '0.72rem' }}>
+              <span>Tiến độ đọc</span>
+              <strong className="text-primary">{progressPercent}%</strong>
+            </div>
+            <ProgressBar now={progressPercent} variant="primary" style={{ height: 6, borderRadius: 3 }} />
           </div>
 
           {/* Theme & Font Controls */}
@@ -140,7 +151,7 @@ export default function ReaderModal({
           <div className="text-center mb-5 pb-3 border-bottom">
             <h1 className="fw-bold fs-3 mb-2">{currentChapter.title}</h1>
             <div className="text-muted small">
-              Tác phẩm: <strong>{novel.title}</strong> · Tác giả: {novel.author_name} · {currentChapter.word_count || 2500} chữ
+              Tác phẩm: <strong>{novel.title}</strong> · Tác giả: {novel.author_name} · {currentChapter.word_count || 2500} chữ · Lượt xem thực tế: <strong className="text-primary">{novel.total_views || 1}</strong>
             </div>
           </div>
 
@@ -156,8 +167,8 @@ export default function ReaderModal({
             {currentChapter.content}
           </div>
 
-          {/* Bottom navigation buttons */}
-          <div className="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+          {/* Bottom navigation buttons with accurate progress */}
+          <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-5 pt-4 border-top gap-3">
             <Button
               variant="outline-primary"
               disabled={!hasPrev}
@@ -168,9 +179,14 @@ export default function ReaderModal({
               Chương trước
             </Button>
 
-            <span className="small text-muted">
-              Đọc xong Chương {currentChapter.chapter_number}
-            </span>
+            <div className="text-center">
+              <div className="small fw-semibold text-dark mb-1">
+                Tiến độ: <span className="text-primary fw-bold">{progressPercent}%</span> (Chương {currentChapter.chapter_number}/{totalChaptersCount})
+              </div>
+              <div style={{ width: 180, margin: '0 auto' }}>
+                <ProgressBar now={progressPercent} variant="primary" style={{ height: 6, borderRadius: 3 }} />
+              </div>
+            </div>
 
             <Button
               variant="primary"
@@ -187,3 +203,4 @@ export default function ReaderModal({
     </Modal>
   );
 }
+
