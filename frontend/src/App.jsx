@@ -5,11 +5,11 @@ import HeroSearch from './components/HeroSearch';
 import QuickFilters from './components/QuickFilters';
 import CategorySection from './components/CategorySection';
 import NovelList from './components/NovelList';
-import PlannerTabs from './components/PlannerTabs';
 import AuthorSection from './components/AuthorSection';
 import NovelDetailModal from './components/NovelDetailModal';
 import ReaderModal from './components/ReaderModal';
 import CrudManagerModal from './components/CrudManagerModal';
+import AuthModal from './components/AuthModal';
 import Footer from './components/Footer';
 
 import { apiService } from './services/api';
@@ -24,10 +24,25 @@ export default function App() {
   const [readingHistory, setReadingHistory] = useState([]);
   const [currentUser, setCurrentUser] = useState(() => {
     try {
+      // Ưu tiên lấy từ auth (đã đăng nhập)
+      const authUser = localStorage.getItem('novel_manager_auth_user');
+      if (authUser) {
+        const parsed = JSON.parse(authUser);
+        return {
+          id: parsed.id,
+          username: parsed.username,
+          email: parsed.email,
+          full_name: parsed.full_name,
+          role: parsed.role || 'reader',
+          avatar: parsed.avatar_url || parsed.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${parsed.username}`,
+          badge: parsed.role === 'admin' ? 'Quản trị viên' : parsed.role === 'author' ? 'Tác giả' : 'Độc giả',
+          isAuthenticated: true,
+        };
+      }
       const saved = localStorage.getItem('novel_manager_user_profile');
       if (saved) return JSON.parse(saved);
     } catch {}
-    return INITIAL_USERS[0];
+    return null; // Chưa đăng nhập
   });
   const [backendStatus, setBackendStatus] = useState({ isOnline: false });
 
@@ -55,6 +70,7 @@ export default function App() {
   const [detailNovel, setDetailNovel] = useState(null);
   const [readingSession, setReadingSession] = useState(null); // { novel, chapterId }
   const [showCrudModal, setShowCrudModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Toast feedback
   const [toast, setToast] = useState({ show: false, message: '', variant: 'primary' });
@@ -307,6 +323,31 @@ export default function App() {
     window.location.reload();
   };
 
+  // ============ AUTH HANDLERS ============
+  const handleLoginSuccess = (user) => {
+    const mappedUser = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role || 'reader',
+      avatar: user.avatar_url || user.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.username}`,
+      badge: user.role === 'admin' ? 'Quản trị viên hệ thống' : user.role === 'author' ? 'Tác giả' : 'Độc giả thân thiết',
+      isAuthenticated: true,
+    };
+    setCurrentUser(mappedUser);
+    try {
+      localStorage.setItem('novel_manager_user_profile', JSON.stringify(mappedUser));
+    } catch {}
+    showToast(`Chào mừng ${mappedUser.full_name}! Đăng nhập thành công 🎉`, 'success');
+  };
+
+  const handleLogout = async () => {
+    await apiService.logout();
+    setCurrentUser(null);
+    showToast('Đã đăng xuất thành công. Hẹn gặp lại! 👋', 'secondary');
+  };
+
   // Điều hướng khi bấm các tab trên Header
   const handleNavSelect = (navKey) => {
     setActiveNav(navKey);
@@ -372,7 +413,7 @@ export default function App() {
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      {/* 1. Header (Booking topbar + navigation pills + user switcher) */}
+      {/* 1. Header (Booking topbar + navigation pills + auth) */}
       <Header
         activeNav={activeNav}
         setActiveNav={handleNavSelect}
@@ -383,6 +424,8 @@ export default function App() {
         onOpenCrud={() => setShowCrudModal(true)}
         onOpenCreateNovel={() => setShowCrudModal(true)}
         backendStatus={backendStatus}
+        onOpenAuth={() => setShowAuthModal(true)}
+        onLogout={handleLogout}
       />
 
 
@@ -453,12 +496,7 @@ export default function App() {
         onResetFilters={handleResetFilters}
       />
 
-      {/* 6. Quick Trip Planner equivalent: Planner Tabs */}
-      <PlannerTabs
-        novels={novels}
-        onViewDetail={handleViewDetail}
-        onReadNow={handleReadNow}
-      />
+
 
       {/* 7. Featured Authors Section (Số tác phẩm & lượt xem thực tế) */}
       <AuthorSection
@@ -505,7 +543,15 @@ export default function App() {
         onChapterChange={handleChapterChange}
       />
 
-      {/* MODAL 3: CRUD Management Panel */}
+      {/* MODAL 3: Auth Modal (Đăng nhập / Đăng ký / Quên mật khẩu) */}
+      <AuthModal
+        show={showAuthModal}
+        onHide={() => setShowAuthModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+        authService={apiService}
+      />
+
+      {/* MODAL 4: CRUD Management Panel */}
       <CrudManagerModal
         show={showCrudModal}
         onHide={() => setShowCrudModal(false)}

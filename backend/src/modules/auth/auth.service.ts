@@ -3,14 +3,16 @@ import {
   ConflictException,
   UnauthorizedException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { UserEntity } from '../users/entities/user.entity';
-import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { RegisterDto, LoginDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
 import { UserRole } from '../../common/enums';
 
 @Injectable()
@@ -90,6 +92,75 @@ export class AuthService {
     });
 
     return { user, accessToken, refreshToken };
+  }
+
+  /**
+   * Quên mật khẩu: Tạo mã reset token và lưu vào DB
+   * Trong môi trường dev, trả token trực tiếp; production sẽ gửi qua email
+   */
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; resetToken?: string }> {
+    const user = await this.userRepo.findOne({
+      where: { email: dto.email, is_active: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy tài khoản với email này');
+    }
+
+    // Tạo mã reset token ngẫu nhiên (6 ký tự hex viết hoa)
+    const resetToken = crypto.randomBytes(3).toString('hex').toUpperCase();
+
+    // Token hết hạn sau 15 phút
+    const resetExpires = new Date();
+    resetExpires.setMinutes(resetExpires.getMinutes() + 15);
+
+    user.reset_token = resetToken;
+    user.reset_token_expires = resetExpires;
+    await this.userRepo.save(user);
+
+    // Dev mode: trả token trực tiếp (Production: gửi email)
+    const isDev = this.configService.get<string>('NODE_ENV', 'development') === 'development';
+
+    return {
+      message: `Mã xác nhận đã được tạo cho email ${dto.email}. Mã có hiệu lực trong 15 phút.`,
+      ...(isDev ? { resetToken } : {}),
+    };
+  }
+
+  /**
+   * Đặt lại mật khẩu mới bằng reset token
+   */
+  async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+    const user = await this.userRepo.findOne({
+      where: {
+        reset_token: dto.token,
+        is_active: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Mã xác nhận không hợp lệ');
+    }
+
+    if (!user.reset_token_expires || user.reset_token_expires < new Date()) {
+      // Token hết hạn -> Xóa token
+      user.reset_token = null as any;
+      user.reset_token_expires = null as any;
+      await this.userRepo.save(user);
+      throw new BadRequestException('Mã xác nhận đã hết hạn. Vui lòng yêu cầu mã mới.');
+    }
+
+    // Băm mật khẩu mới
+    const saltRounds = 10;
+    user.password_hash = await bcrypt.hash(dto.newPassword, saltRounds);
+
+    // Xóa reset token sau khi đổi mật khẩu thành công
+    user.reset_token = null as any;
+    user.reset_token_expires = null as any;
+
+    await this.userRepo.save(user);
+
+    return { message: 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập bằng mật khẩu mới.' };
   }
 
   async validateUserById(id: number): Promise<UserEntity> {

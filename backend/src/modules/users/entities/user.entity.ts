@@ -46,6 +46,13 @@ export class UserEntity {
   @Column({ default: true })
   is_active: boolean;
 
+  @Column({ length: 255, nullable: true })
+  @Exclude()
+  reset_token: string;
+
+  @Column({ type: 'datetime', nullable: true })
+  reset_token_expires: Date;
+
   @CreateDateColumn()
   created_at: Date;
 

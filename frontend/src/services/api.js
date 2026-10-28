@@ -546,5 +546,182 @@ export const apiService = {
     localStorage.removeItem(STORAGE_KEYS.BOOKMARKS);
     localStorage.removeItem(STORAGE_KEYS.HISTORY);
     return true;
-  }
+  },
+
+  // ======================== AUTHENTICATION API ========================
+
+  /**
+   * Đăng nhập người dùng qua Backend /api/auth/login
+   */
+  async login(email, password) {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        const payload = data.data || data;
+        const user = payload.user || payload;
+        // Lưu thông tin user vào localStorage
+        localStorage.setItem('novel_manager_auth_user', JSON.stringify(user));
+        if (payload.accessToken || data.accessToken) {
+          localStorage.setItem('novel_manager_access_token', payload.accessToken || data.accessToken);
+        }
+        return { success: true, user, message: payload.message || data.message };
+      } else {
+        return {
+          success: false,
+          message: data.message || 'Email hoặc mật khẩu không chính xác',
+        };
+      }
+    } catch (err) {
+      console.warn('Lỗi đăng nhập:', err);
+      return { success: false, message: 'Không thể kết nối đến server. Vui lòng thử lại.' };
+    }
+  },
+
+  /**
+   * Đăng ký tài khoản mới qua Backend /api/auth/register
+   */
+  async register({ username, email, full_name, password }) {
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, full_name, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok || res.status === 201) {
+        const payload = data.data || data;
+        return { success: true, user: payload.user || payload, message: payload.message || data.message };
+      } else {
+        return {
+          success: false,
+          message: data.message || 'Đăng ký thất bại',
+        };
+      }
+    } catch (err) {
+      console.warn('Lỗi đăng ký:', err);
+      return { success: false, message: 'Không thể kết nối đến server. Vui lòng thử lại.' };
+    }
+  },
+
+  /**
+   * Quên mật khẩu - Yêu cầu gửi mã xác nhận qua email
+   */
+  async forgotPassword(email) {
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        const payload = data.data || data;
+        return {
+          success: true,
+          message: payload.message || 'Mã đặt lại mật khẩu đã được tạo.',
+          resetToken: payload.resetToken, // Token trả về trong môi trường dev
+        };
+      } else {
+        return {
+          success: false,
+          message: data.message || 'Không tìm thấy tài khoản với email này',
+        };
+      }
+    } catch (err) {
+      console.warn('Lỗi quên mật khẩu:', err);
+      return { success: false, message: 'Không thể kết nối đến server. Vui lòng thử lại.' };
+    }
+  },
+
+  /**
+   * Đặt lại mật khẩu mới bằng mã xác nhận (reset token)
+   */
+  async resetPassword(token, newPassword) {
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, newPassword }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        const payload = data.data || data;
+        return { success: true, message: payload.message || 'Đặt lại mật khẩu thành công!' };
+      } else {
+        return {
+          success: false,
+          message: data.message || 'Mã xác nhận không hợp lệ hoặc đã hết hạn',
+        };
+      }
+    } catch (err) {
+      console.warn('Lỗi đặt lại mật khẩu:', err);
+      return { success: false, message: 'Không thể kết nối đến server. Vui lòng thử lại.' };
+    }
+  },
+
+  /**
+   * Đăng xuất (xóa cookie + localStorage)
+   */
+  async logout() {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {}
+    localStorage.removeItem('novel_manager_auth_user');
+    localStorage.removeItem('novel_manager_access_token');
+    localStorage.removeItem('novel_manager_user_profile');
+    return { success: true };
+  },
+
+  /**
+   * Lấy thông tin user hiện tại (từ JWT Cookie)
+   */
+  async getMe() {
+    try {
+      const token = localStorage.getItem('novel_manager_access_token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch('/api/auth/me', {
+        credentials: 'include',
+        headers,
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        return { success: true, user: data };
+      }
+    } catch {}
+    return { success: false };
+  },
+
+  /**
+   * Kiểm tra đã đăng nhập chưa (từ localStorage)
+   */
+  getStoredUser() {
+    try {
+      const stored = localStorage.getItem('novel_manager_auth_user');
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return null;
+  },
 };

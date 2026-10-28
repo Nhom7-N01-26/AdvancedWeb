@@ -11,7 +11,7 @@ import {
 import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Public } from '../../common/decorators/roles.decorator';
@@ -107,5 +107,25 @@ export class AuthController {
       role: user.role,
       author: user.author ? { id: user.author.id, pen_name: user.author.pen_name } : null,
     };
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Quên mật khẩu - Gửi mã xác nhận đặt lại mật khẩu' })
+  @ApiResponse({ status: 200, description: 'Mã xác nhận đã được tạo' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy tài khoản với email này' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return await this.authService.forgotPassword(dto);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Đặt lại mật khẩu mới bằng mã xác nhận' })
+  @ApiResponse({ status: 200, description: 'Đặt lại mật khẩu thành công' })
+  @ApiResponse({ status: 400, description: 'Mã xác nhận không hợp lệ hoặc đã hết hạn' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return await this.authService.resetPassword(dto);
   }
 }

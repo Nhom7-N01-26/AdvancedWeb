@@ -24,6 +24,8 @@ CREATE TABLE users (
     avatar_url VARCHAR(500) DEFAULT NULL,
     role ENUM('admin', 'author', 'reader') NOT NULL DEFAULT 'reader',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    reset_token VARCHAR(255) DEFAULT NULL,
+    reset_token_expires DATETIME DEFAULT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_users_role (role),

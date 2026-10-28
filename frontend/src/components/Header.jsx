@@ -11,7 +11,9 @@ export default function Header({
   bookmarkCount,
   onOpenCrud,
   onOpenCreateNovel,
-  backendStatus
+  backendStatus,
+  onOpenAuth,
+  onLogout
 }) {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [tempAvatar, setTempAvatar] = useState('');
@@ -93,108 +95,124 @@ export default function Header({
               🇻🇳 <span className="small">VI</span>
             </span>
 
-            {/* Post / Create novel button */}
-            <Button
-              variant="outline-light"
-              size="sm"
-              className="fw-bold px-3 py-1 rounded-1"
-              onClick={onOpenCreateNovel}
-            >
-              <i className="bi bi-plus-circle me-1"></i>
-              Đăng truyện mới
-            </Button>
+            {/* ===== NẾU CHƯA ĐĂNG NHẬP ===== */}
+            {!currentUser ? (
+              <>
+                <Button
+                  variant="outline-light"
+                  size="sm"
+                  className="fw-bold px-3 py-1 rounded-1"
+                  onClick={onOpenAuth}
+                >
+                  <i className="bi bi-box-arrow-in-right me-1"></i>
+                  Đăng nhập
+                </Button>
+                <Button
+                  variant="warning"
+                  size="sm"
+                  className="fw-bold px-3 py-1 text-dark rounded-1"
+                  onClick={onOpenAuth}
+                >
+                  <i className="bi bi-person-plus me-1"></i>
+                  Đăng ký
+                </Button>
+              </>
+            ) : (
+              <>
+                {/* Post / Create novel button */}
+                <Button
+                  variant="outline-light"
+                  size="sm"
+                  className="fw-bold px-3 py-1 rounded-1"
+                  onClick={onOpenCreateNovel}
+                >
+                  <i className="bi bi-plus-circle me-1"></i>
+                  Đăng truyện mới
+                </Button>
 
-            {/* Management shortcut */}
-            <Button
-              variant="warning"
-              size="sm"
-              className="fw-bold px-3 py-1 text-dark rounded-1"
-              onClick={onOpenCrud}
-            >
-              <i className="bi bi-kanban me-1"></i>
-              Quản lý tác phẩm
-            </Button>
+                {/* Management shortcut */}
+                <Button
+                  variant="warning"
+                  size="sm"
+                  className="fw-bold px-3 py-1 text-dark rounded-1"
+                  onClick={onOpenCrud}
+                >
+                  <i className="bi bi-kanban me-1"></i>
+                  Quản lý tác phẩm
+                </Button>
 
-            {/* User Profile & Role Switcher */}
-            <Dropdown align="end">
-              <Dropdown.Toggle
-                variant="outline-light"
-                id="user-role-dropdown"
-                size="sm"
-                className="d-flex align-items-center gap-2 border-0 bg-white text-dark rounded-pill px-2 py-1 shadow-sm"
-              >
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.full_name}
-                  className="rounded-circle"
-                  style={{ width: 24, height: 24, objectFit: 'cover' }}
-                />
-                <span className="fw-semibold small d-none d-sm-inline">{currentUser.full_name.split(' ')[0]}</span>
-                <span className="badge bg-primary text-white" style={{ fontSize: '0.65rem' }}>
-                  {currentUser.role.toUpperCase()}
-                </span>
-              </Dropdown.Toggle>
-
-              <Dropdown.Menu className="shadow-lg border-0 p-2" style={{ minWidth: 270 }}>
-                <div className="px-2 py-1 mb-2 border-bottom">
-                  <div className="d-flex align-items-center gap-2 mb-1">
+                {/* User Profile Dropdown */}
+                <Dropdown align="end">
+                  <Dropdown.Toggle
+                    variant="outline-light"
+                    id="user-role-dropdown"
+                    size="sm"
+                    className="d-flex align-items-center gap-2 border-0 bg-white text-dark rounded-pill px-2 py-1 shadow-sm"
+                  >
                     <img
                       src={currentUser.avatar}
                       alt={currentUser.full_name}
-                      className="rounded-circle border"
-                      style={{ width: 36, height: 36, objectFit: 'cover' }}
+                      className="rounded-circle"
+                      style={{ width: 24, height: 24, objectFit: 'cover' }}
                     />
-                    <div>
-                      <div className="fw-bold text-dark small">{currentUser.full_name}</div>
-                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>{currentUser.email}</div>
+                    <span className="fw-semibold small d-none d-sm-inline">{currentUser.full_name?.split(' ').pop()}</span>
+                    <span className="badge bg-primary text-white" style={{ fontSize: '0.65rem' }}>
+                      {currentUser.role?.toUpperCase()}
+                    </span>
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu className="shadow-lg border-0 p-2" style={{ minWidth: 270 }}>
+                    <div className="px-2 py-1 mb-2 border-bottom">
+                      <div className="d-flex align-items-center gap-2 mb-1">
+                        <img
+                          src={currentUser.avatar}
+                          alt={currentUser.full_name}
+                          className="rounded-circle border"
+                          style={{ width: 36, height: 36, objectFit: 'cover' }}
+                        />
+                        <div>
+                          <div className="fw-bold text-dark small">{currentUser.full_name}</div>
+                          <div className="text-muted" style={{ fontSize: '0.72rem' }}>{currentUser.email}</div>
+                        </div>
+                      </div>
+                      <div className="badge bg-primary mt-1">{currentUser.badge}</div>
                     </div>
-                  </div>
-                  <div className="badge bg-primary mt-1">{currentUser.badge}</div>
-                </div>
 
-                {/* NÚT ĐỔI AVATAR TỪ THƯ VIỆN ẢNH NGƯỜI DÙNG */}
-                <div className="px-2 mb-2">
-                  <Button
-                    size="sm"
-                    variant="outline-primary"
-                    className="w-100 d-flex align-items-center justify-content-center gap-2 py-1 fw-semibold"
-                    style={{ fontSize: '0.8rem' }}
-                    onClick={() => {
-                      setTempAvatar(currentUser.avatar);
-                      setShowAvatarModal(true);
-                    }}
-                  >
-                    <i className="bi bi-camera-fill"></i>
-                    Đổi avatar từ thư viện ảnh
-                  </Button>
-                </div>
-
-                <div className="text-muted small px-2 mb-1 fw-bold" style={{ fontSize: '0.7rem' }}>CHUYỂN VAI TRÒ (DEMO):</div>
-                {INITIAL_USERS.map((u) => (
-                  <Dropdown.Item
-                    key={u.id}
-                    active={currentUser.id === u.id}
-                    onClick={() => setCurrentUser(u)}
-                    className="rounded small py-1"
-                  >
-                    <div className="d-flex align-items-center justify-content-between">
-                      <span>{u.full_name}</span>
-                      <span className="badge bg-secondary ms-2">{u.role}</span>
+                    {/* NÚT ĐỔI AVATAR TỪ THƯ VIỆN ẢNH NGƯỜI DÙNG */}
+                    <div className="px-2 mb-2">
+                      <Button
+                        size="sm"
+                        variant="outline-primary"
+                        className="w-100 d-flex align-items-center justify-content-center gap-2 py-1 fw-semibold"
+                        style={{ fontSize: '0.8rem' }}
+                        onClick={() => {
+                          setTempAvatar(currentUser.avatar);
+                          setShowAvatarModal(true);
+                        }}
+                      >
+                        <i className="bi bi-camera-fill"></i>
+                        Đổi avatar từ thư viện ảnh
+                      </Button>
                     </div>
-                  </Dropdown.Item>
-                ))}
 
-                <Dropdown.Divider />
-                <Dropdown.Item onClick={() => setActiveNav('bookmarks')} className="small">
-                  <i className="bi bi-bookmark-heart text-danger me-2"></i>
-                  Tủ sách đã lưu ({bookmarkCount})
-                </Dropdown.Item>
-                <Dropdown.Item onClick={onOpenCrud} className="small">
-                  <i className="bi bi-sliders text-primary me-2"></i>
-                  Quản lý tác phẩm
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
+                    <Dropdown.Item onClick={() => setActiveNav('bookmarks')} className="small">
+                      <i className="bi bi-bookmark-heart text-danger me-2"></i>
+                      Tủ sách đã lưu ({bookmarkCount})
+                    </Dropdown.Item>
+                    <Dropdown.Item onClick={onOpenCrud} className="small">
+                      <i className="bi bi-sliders text-primary me-2"></i>
+                      Quản lý tác phẩm
+                    </Dropdown.Item>
+
+                    <Dropdown.Divider />
+                    <Dropdown.Item onClick={onLogout} className="small text-danger fw-semibold">
+                      <i className="bi bi-box-arrow-right me-2"></i>
+                      Đăng xuất
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </>
+            )}
           </div>
         </div>
 
@@ -216,7 +234,7 @@ export default function Header({
             <div className="text-center mb-4">
               <div className="position-relative d-inline-block">
                 <img
-                  src={tempAvatar || currentUser.avatar}
+                  src={tempAvatar || currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
                   alt="Avatar Preview"
                   className="rounded-circle shadow-sm border border-3 border-primary"
                   style={{ width: 110, height: 110, objectFit: 'cover' }}
@@ -231,7 +249,7 @@ export default function Header({
                 </button>
               </div>
               <div className="small text-muted mt-2">
-                Ảnh đại diện hiện tại của <strong>{currentUser.full_name}</strong>
+                Ảnh đại diện hiện tại của <strong>{currentUser?.full_name || 'Bạn'}</strong>
               </div>
             </div>
 

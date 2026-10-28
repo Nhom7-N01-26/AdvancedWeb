@@ -46,3 +46,22 @@ export class RegisterDto {
   @IsEnum(UserRole)
   role?: UserRole;
 }
+
+export class ForgotPasswordDto {
+  @ApiProperty({ example: 'nguyenvana@gmail.com', description: 'Email tài khoản cần đặt lại mật khẩu' })
+  @IsEmail({}, { message: 'Email không hợp lệ' })
+  @IsNotEmpty({ message: 'Email không được để trống' })
+  email: string;
+}
+
+export class ResetPasswordDto {
+  @ApiProperty({ example: 'abc123xyz', description: 'Mã xác nhận đặt lại mật khẩu' })
+  @IsNotEmpty({ message: 'Mã xác nhận không được để trống' })
+  @IsString()
+  token: string;
+
+  @ApiProperty({ example: 'MatKhauMoi@123', description: 'Mật khẩu mới' })
+  @IsNotEmpty({ message: 'Mật khẩu mới không được để trống' })
+  @MinLength(6, { message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
+  newPassword: string;
+}
