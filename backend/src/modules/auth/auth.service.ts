@@ -50,7 +50,7 @@ export class AuthService {
       password_hash: passwordHash,
       full_name: dto.full_name,
       avatar_url: dto.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${dto.username}`,
-      role: dto.role || UserRole.READER,
+      role: UserRole.READER, // Tài khoản khách đăng ký luôn luôn là Độc giả (Reader)
       is_active: true,
     });
 

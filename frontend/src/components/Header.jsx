@@ -119,27 +119,30 @@ export default function Header({
               </>
             ) : (
               <>
-                {/* Post / Create novel button */}
-                <Button
-                  variant="outline-light"
-                  size="sm"
-                  className="fw-bold px-3 py-1 rounded-1"
-                  onClick={onOpenCreateNovel}
-                >
-                  <i className="bi bi-plus-circle me-1"></i>
-                  Đăng truyện mới
-                </Button>
+                {/* ONLY ADMIN: Post / Create novel & Management shortcut */}
+                {currentUser.role === 'admin' && (
+                  <>
+                    <Button
+                      variant="outline-light"
+                      size="sm"
+                      className="fw-bold px-3 py-1 rounded-1"
+                      onClick={onOpenCreateNovel}
+                    >
+                      <i className="bi bi-plus-circle me-1"></i>
+                      Đăng truyện mới
+                    </Button>
 
-                {/* Management shortcut */}
-                <Button
-                  variant="warning"
-                  size="sm"
-                  className="fw-bold px-3 py-1 text-dark rounded-1"
-                  onClick={onOpenCrud}
-                >
-                  <i className="bi bi-kanban me-1"></i>
-                  Quản lý tác phẩm
-                </Button>
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      className="fw-bold px-3 py-1 text-dark rounded-1"
+                      onClick={onOpenCrud}
+                    >
+                      <i className="bi bi-kanban me-1"></i>
+                      Quản lý tác phẩm
+                    </Button>
+                  </>
+                )}
 
                 {/* User Profile Dropdown */}
                 <Dropdown align="end">
@@ -156,7 +159,7 @@ export default function Header({
                       style={{ width: 24, height: 24, objectFit: 'cover' }}
                     />
                     <span className="fw-semibold small d-none d-sm-inline">{currentUser.full_name?.split(' ').pop()}</span>
-                    <span className="badge bg-primary text-white" style={{ fontSize: '0.65rem' }}>
+                    <span className={`badge text-white ${currentUser.role === 'admin' ? 'bg-danger' : 'bg-primary'}`} style={{ fontSize: '0.65rem' }}>
                       {currentUser.role?.toUpperCase()}
                     </span>
                   </Dropdown.Toggle>
@@ -175,7 +178,7 @@ export default function Header({
                           <div className="text-muted" style={{ fontSize: '0.72rem' }}>{currentUser.email}</div>
                         </div>
                       </div>
-                      <div className="badge bg-primary mt-1">{currentUser.badge}</div>
+                      <div className={`badge mt-1 ${currentUser.role === 'admin' ? 'bg-danger' : 'bg-primary'}`}>{currentUser.badge}</div>
                     </div>
 
                     {/* NÚT ĐỔI AVATAR TỪ THƯ VIỆN ẢNH NGƯỜI DÙNG */}
@@ -199,10 +202,12 @@ export default function Header({
                       <i className="bi bi-bookmark-heart text-danger me-2"></i>
                       Tủ sách đã lưu ({bookmarkCount})
                     </Dropdown.Item>
-                    <Dropdown.Item onClick={onOpenCrud} className="small">
-                      <i className="bi bi-sliders text-primary me-2"></i>
-                      Quản lý tác phẩm
-                    </Dropdown.Item>
+                    {currentUser.role === 'admin' && (
+                      <Dropdown.Item onClick={onOpenCrud} className="small">
+                        <i className="bi bi-sliders text-primary me-2"></i>
+                        Quản lý tác phẩm
+                      </Dropdown.Item>
+                    )}
 
                     <Dropdown.Divider />
                     <Dropdown.Item onClick={onLogout} className="small text-danger fw-semibold">
@@ -355,13 +360,15 @@ export default function Header({
             )}
           </button>
 
-          <button
-            className={`booking-nav-pill ${activeNav === 'crud' ? 'active' : ''}`}
-            onClick={onOpenCrud}
-          >
-            <i className="bi bi-kanban"></i>
-            Quản lý tác phẩm
-          </button>
+          {currentUser?.role === 'admin' && (
+            <button
+              className={`booking-nav-pill ${activeNav === 'crud' ? 'active' : ''}`}
+              onClick={onOpenCrud}
+            >
+              <i className="bi bi-kanban"></i>
+              Quản lý tác phẩm
+            </button>
+          )}
         </nav>
       </Container>
     </header>

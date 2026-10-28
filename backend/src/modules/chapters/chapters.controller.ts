@@ -28,9 +28,9 @@ export class ChaptersController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Thêm chương mới (Dành cho Tác giả/Quản trị viên)' })
+  @ApiOperation({ summary: 'Thêm chương mới (Chỉ Quản trị viên Admin)' })
   @ApiResponse({ status: 201, description: 'Chương truyện đã được xuất bản' })
   async create(@Body() createDto: CreateChapterDto) {
     return await this.chaptersService.create(

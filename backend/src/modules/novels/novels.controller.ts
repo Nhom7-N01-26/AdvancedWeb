@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Put,
+  Delete,
   Body,
   Param,
   Query,
@@ -10,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { NovelsService } from './novels.service';
-import { CreateNovelDto, QueryNovelDto } from './dto/novel.dto';
+import { CreateNovelDto, QueryNovelDto, UpdateNovelDto } from './dto/novel.dto';
 import { Public, Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -53,10 +55,31 @@ export class NovelsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Đăng bộ truyện mới (Tác giả hoặc Admin)' })
+  @ApiOperation({ summary: 'Đăng bộ truyện mới (Chỉ Quản trị viên Admin)' })
   create(@Body() dto: CreateNovelDto, @CurrentUser() user: UserEntity) {
     return this.novelsService.create(dto, user.id);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cập nhật thông tin truyện (Chỉ Quản trị viên Admin)' })
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateNovelDto,
+  ) {
+    return this.novelsService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Xóa tác phẩm truyện (Chỉ Quản trị viên Admin)' })
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.novelsService.remove(id);
   }
 }

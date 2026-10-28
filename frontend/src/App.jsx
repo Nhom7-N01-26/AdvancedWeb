@@ -280,14 +280,36 @@ export default function App() {
   };
 
 
-  // CRUD Handlers
+  // Auth & Role Guard
+  const handleOpenCrud = () => {
+    if (!currentUser) {
+      showToast('Vui lòng đăng nhập với tài khoản Quản trị viên (Admin) để quản lý tác phẩm!', 'warning');
+      setShowAuthModal(true);
+      return;
+    }
+    if (currentUser.role !== 'admin') {
+      showToast('Chỉ Quản trị viên (Admin) mới có quyền quản lý tác phẩm!', 'danger');
+      return;
+    }
+    setShowCrudModal(true);
+  };
+
+  // CRUD Handlers (Only Admin)
   const handleCreateNovel = async (newNovelData) => {
+    if (currentUser?.role !== 'admin') {
+      showToast('Chỉ Quản trị viên (Admin) mới có quyền thêm tác phẩm!', 'danger');
+      return;
+    }
     const created = await apiService.createNovel(newNovelData);
     setNovels((prev) => [created, ...prev]);
     showToast(`Đã thêm tiểu thuyết "${created.title}" thành công!`, 'success');
   };
 
   const handleUpdateNovel = async (id, updatedData) => {
+    if (currentUser?.role !== 'admin') {
+      showToast('Chỉ Quản trị viên (Admin) mới có quyền sửa tác phẩm!', 'danger');
+      return;
+    }
     const updated = await apiService.updateNovel(id, updatedData);
     setNovels((prev) => prev.map((n) => (n.id === id ? updated : n)));
     if (detailNovel && detailNovel.id === id) {
@@ -297,6 +319,10 @@ export default function App() {
   };
 
   const handleDeleteNovel = async (id) => {
+    if (currentUser?.role !== 'admin') {
+      showToast('Chỉ Quản trị viên (Admin) mới có quyền xóa tác phẩm!', 'danger');
+      return;
+    }
     await apiService.deleteNovel(id);
     setNovels((prev) => prev.filter((n) => n.id !== id));
     if (detailNovel && detailNovel.id === id) {
@@ -345,6 +371,7 @@ export default function App() {
   const handleLogout = async () => {
     await apiService.logout();
     setCurrentUser(null);
+    setShowCrudModal(false);
     showToast('Đã đăng xuất thành công. Hẹn gặp lại! 👋', 'secondary');
   };
 
@@ -393,7 +420,7 @@ export default function App() {
         showToast('Tủ sách của bạn hiện đang trống', 'secondary');
       }
     } else if (navKey === 'crud') {
-      setShowCrudModal(true);
+      handleOpenCrud();
     }
   };
 
@@ -421,8 +448,8 @@ export default function App() {
         setCurrentUser={setCurrentUser}
         onUpdateAvatar={handleUpdateAvatar}
         bookmarkCount={bookmarks.length}
-        onOpenCrud={() => setShowCrudModal(true)}
-        onOpenCreateNovel={() => setShowCrudModal(true)}
+        onOpenCrud={handleOpenCrud}
+        onOpenCreateNovel={handleOpenCrud}
         backendStatus={backendStatus}
         onOpenAuth={() => setShowAuthModal(true)}
         onLogout={handleLogout}
@@ -519,7 +546,7 @@ export default function App() {
           setSearchQuery(authorName);
           window.scrollTo({ top: 400, behavior: 'smooth' });
         }}
-        onOpenCreateNovel={() => setShowCrudModal(true)}
+        onOpenCreateNovel={handleOpenCrud}
       />
 
       {/* MODAL 1: Novel Detail Modal (Số liệu thực tế, bình luận thực tế) */}

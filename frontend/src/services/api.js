@@ -79,6 +79,14 @@ function setStoredData(key, data) {
 
 export const apiService = {
   calculateRealRating,
+  getAuthHeaders() {
+    const headers = { 'Content-Type': 'application/json' };
+    try {
+      const token = localStorage.getItem('novel_manager_access_token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    } catch {}
+    return headers;
+  },
   // Kiểm tra sức khỏe kết nối Backend
   async checkBackendHealth() {
     try {
@@ -304,7 +312,8 @@ export const apiService = {
     try {
       await fetch('/api/novels', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify(novelData)
       });
     } catch {}
@@ -323,7 +332,8 @@ export const apiService = {
     try {
       await fetch(`/api/novels/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify(updatedFields)
       });
     } catch {}
@@ -337,7 +347,11 @@ export const apiService = {
     setStoredData(STORAGE_KEYS.NOVELS, filtered);
 
     try {
-      await fetch(`/api/novels/${id}`, { method: 'DELETE' });
+      await fetch(`/api/novels/${id}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders(),
+        credentials: 'include'
+      });
     } catch {}
 
     return true;
@@ -525,7 +539,8 @@ export const apiService = {
     try {
       fetch('/api/chapters', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({
           novel_id: novel.id,
           title: newChapter.title,

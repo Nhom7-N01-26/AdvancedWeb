@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsEnum, IsArray, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsEnum, IsArray, IsNumber, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { NovelStatus } from '../../../common/enums';
 
@@ -22,6 +22,38 @@ export class CreateNovelDto {
   @IsOptional()
   @IsEnum(NovelStatus)
   status?: NovelStatus;
+
+  @ApiPropertyOptional({ example: [1, 2], description: 'Danh sách ID thể loại' })
+  @IsOptional()
+  @IsArray()
+  category_ids?: number[];
+}
+
+export class UpdateNovelDto {
+  @ApiPropertyOptional({ example: 'Tôi Trở Thành Thiên Tài Tốc Biến' })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @ApiPropertyOptional({ example: 'Tóm tắt câu chuyện...' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({ example: '/public/covers/default_cover.jpg' })
+  @IsOptional()
+  @IsString()
+  cover_image?: string;
+
+  @ApiPropertyOptional({ enum: NovelStatus })
+  @IsOptional()
+  @IsEnum(NovelStatus)
+  status?: NovelStatus;
+
+  @ApiPropertyOptional({ example: true, description: 'Đánh dấu truyện nổi bật' })
+  @IsOptional()
+  @IsBoolean()
+  is_featured?: boolean;
 
   @ApiPropertyOptional({ example: [1, 2], description: 'Danh sách ID thể loại' })
   @IsOptional()

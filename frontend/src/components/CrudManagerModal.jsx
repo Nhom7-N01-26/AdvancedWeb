@@ -84,9 +84,13 @@ export default function CrudManagerModal({
       return;
     }
 
+    const matchedCat = categories?.find(
+      (c) => c.name === formData.category || c.id === Number(formData.category_id)
+    );
     const payload = {
       ...formData,
-      tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean)
+      category_ids: matchedCat ? [matchedCat.id] : [1],
+      tags: typeof formData.tags === 'string' ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean) : (formData.tags || [])
     };
 
     if (editingNovel) {

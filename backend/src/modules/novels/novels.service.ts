@@ -9,7 +9,7 @@ import { Repository, In } from 'typeorm';
 import { NovelEntity } from './entities/novel.entity';
 import { CategoryEntity } from '../categories/entities/category.entity';
 import { AuthorEntity } from '../authors/entities/author.entity';
-import { CreateNovelDto, QueryNovelDto } from './dto/novel.dto';
+import { CreateNovelDto, QueryNovelDto, UpdateNovelDto } from './dto/novel.dto';
 import { NovelStatus } from '../../common/enums';
 
 @Injectable()
@@ -177,6 +177,65 @@ export class NovelsService {
     });
 
     return await this.novelRepo.save(novel);
+  }
+
+  async update(id: number, dto: UpdateNovelDto): Promise<NovelEntity> {
+    const novel = await this.novelRepo.findOne({
+      where: { id },
+      relations: { categories: true, author: true },
+    });
+
+    if (!novel) {
+      throw new NotFoundException(`Không tìm thấy truyện với ID: ${id}`);
+    }
+
+    if (dto.title && dto.title !== novel.title) {
+      novel.title = dto.title;
+      let newSlug = this.slugify(dto.title);
+      const existing = await this.novelRepo.findOne({ where: { slug: newSlug } });
+      if (existing && existing.id !== id) {
+        newSlug = `${newSlug}-${Date.now()}`;
+      }
+      novel.slug = newSlug;
+    }
+
+    if (dto.description !== undefined) {
+      novel.description = dto.description;
+    }
+
+    if (dto.cover_image !== undefined) {
+      novel.cover_image = dto.cover_image;
+    }
+
+    if (dto.status !== undefined) {
+      novel.status = dto.status;
+    }
+
+    if (dto.is_featured !== undefined) {
+      novel.is_featured = dto.is_featured;
+    }
+
+    if (dto.category_ids && Array.isArray(dto.category_ids)) {
+      novel.categories = await this.catRepo.findBy({ id: In(dto.category_ids) });
+    }
+
+    return await this.novelRepo.save(novel);
+  }
+
+  async remove(id: number): Promise<{ message: string; deletedId: number }> {
+    const novel = await this.novelRepo.findOne({
+      where: { id },
+    });
+
+    if (!novel) {
+      throw new NotFoundException(`Không tìm thấy truyện với ID: ${id}`);
+    }
+
+    await this.novelRepo.remove(novel);
+    return {
+      message: `Đã xóa tác phẩm '${novel.title}' thành công`,
+      deletedId: id,
+    };
   }
 
   private slugify(text: string): string {
