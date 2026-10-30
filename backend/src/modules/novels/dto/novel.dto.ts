@@ -27,6 +27,11 @@ export class CreateNovelDto {
   @IsOptional()
   @IsArray()
   category_ids?: number[];
+
+  @ApiPropertyOptional({ example: 'Bút danh tác giả', description: 'Tên tác giả hoặc bút danh' })
+  @IsOptional()
+  @IsString()
+  author_name?: string;
 }
 
 export class UpdateNovelDto {
@@ -59,6 +64,11 @@ export class UpdateNovelDto {
   @IsOptional()
   @IsArray()
   category_ids?: number[];
+
+  @ApiPropertyOptional({ example: 'Bút danh tác giả', description: 'Tên tác giả hoặc bút danh' })
+  @IsOptional()
+  @IsString()
+  author_name?: string;
 }
 
 export class QueryNovelDto {

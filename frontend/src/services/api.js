@@ -25,7 +25,7 @@ try {
   localStorage.removeItem('novel_manager_history_v5');
 } catch {}
 
-// Tính toán điểm số Booking thực tế từ mảng reviews (CHỈ HIỆN ĐIỂM KHI CÓ ĐÁNH GIÁ THỰC TẾ)
+// Tính toán điểm số từ mảng reviews
 export function calculateRealRating(reviews = []) {
   if (!reviews || reviews.length === 0) {
     return {
@@ -38,7 +38,7 @@ export function calculateRealRating(reviews = []) {
 
   const sum = reviews.reduce((acc, r) => acc + Number(r.score || r.rating || 0), 0);
   const avg = sum / reviews.length; // Thang 1-5
-  const bookingScore = avg <= 5 ? avg * 2 : avg; // Quy đổi ra thang 10 chuẩn Booking
+  const bookingScore = avg <= 5 ? avg * 2 : avg; // Thang điểm 10
 
   let badge = 'Tốt';
   if (bookingScore >= 9.5) badge = 'Kiệt tác xuất sắc';
@@ -100,7 +100,7 @@ export const apiService = {
     }
   },
 
-  // 1. NOVELS CRUD - Kết nối thực tế tới Backend /api/novels
+  // Novels CRUD
   async getNovels(params = {}) {
     try {
       const query = new URLSearchParams(params).toString();
@@ -237,12 +237,12 @@ export const apiService = {
     return n?.reviews || [];
   },
 
-  // Tăng 1 lượt xem thực tế khi độc giả vào đọc chương
+  // Tăng lượt xem tiểu thuyết
   async incrementNovelViews(novelId) {
     const id = parseInt(novelId, 10);
     let updatedViews = 1;
 
-    // 1. Gửi lên Backend MySQL thực tế
+    // Gửi lên backend
     try {
       const res = await fetch(`/api/novels/${id}/view`, { method: 'POST' });
       if (res.ok) {
@@ -253,7 +253,7 @@ export const apiService = {
       }
     } catch {}
 
-    // 2. Cập nhật state & bộ nhớ cục bộ
+    // Cập nhật local state
     const novels = getStoredData(STORAGE_KEYS.NOVELS, INITIAL_NOVELS);
     const index = novels.findIndex((n) => n.id === id);
     if (index > -1) {
@@ -267,23 +267,56 @@ export const apiService = {
 
 
   async createNovel(novelData) {
+    let createdBackendNovel = null;
+    try {
+      const res = await fetch('/api/novels', {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({
+          title: novelData.title,
+          author_name: novelData.author_name,
+          category_ids: novelData.category_ids || [1],
+          status: novelData.status || 'ongoing',
+          description: novelData.description,
+          cover_image: novelData.cover_image
+        })
+      });
+      if (res.ok) {
+        const resJson = await res.json();
+        createdBackendNovel = resJson.data || resJson;
+      }
+    } catch (e) {
+      console.warn('Lỗi gọi API createNovel:', e);
+    }
+
     const novels = getStoredData(STORAGE_KEYS.NOVELS, INITIAL_NOVELS);
-    const newId = novels.length > 0 ? Math.max(...novels.map((n) => n.id)) + 1 : 1;
+    const newId = createdBackendNovel?.id || (novels.length > 0 ? Math.max(...novels.map((n) => n.id)) + 1 : 1);
     const initialReviews = [];
     const ratingInfo = calculateRealRating(initialReviews);
+
+    const firstChap = novelData.chapters?.[0] || {
+      id: newId * 100 + 1,
+      novel_id: newId,
+      chapter_number: 1,
+      title: 'Chương 1: Khởi đầu mới',
+      word_count: 1200,
+      published_at: new Date().toISOString().split('T')[0],
+      content: 'Nội dung chương 1 của tiểu thuyết mới được tạo lập...'
+    };
 
     const newNovel = {
       id: newId,
       title: novelData.title,
-      slug: novelData.slug || novelData.title.toLowerCase().replace(/\s+/g, '-'),
-      author_id: parseInt(novelData.author_id, 10) || 1,
-      author_name: novelData.author_name || 'Tác giả',
+      slug: createdBackendNovel?.slug || novelData.slug || novelData.title.toLowerCase().replace(/\s+/g, '-'),
+      author_id: createdBackendNovel?.author_id || parseInt(novelData.author_id, 10) || 1,
+      author_name: novelData.author_name || createdBackendNovel?.author?.pen_name || 'Tác giả',
       category: novelData.category || 'Light Novel',
       categories: novelData.categories || [novelData.category || 'Light Novel'],
       tags: novelData.tags || ['Nhật Bản', 'Light Novel'],
       description: novelData.description || 'Mô tả tác phẩm...',
       cover_image: novelData.cover_image || '/assets/covers/default_cover.jpg',
-      status: novelData.status || 'completed',
+      status: novelData.status || 'ongoing',
       total_views: 0,
       is_featured: Boolean(novelData.is_featured),
       is_genius: false,
@@ -291,15 +324,11 @@ export const apiService = {
       location_label: 'Kho Truyện Phenikaa',
       published_at: new Date().toISOString().split('T')[0],
       latest_update: 'Vừa xong',
-      chapters: novelData.chapters || [
+      chapters: [
         {
-          id: newId * 100 + 1,
+          ...firstChap,
+          id: firstChap.id || newId * 100 + 1,
           novel_id: newId,
-          chapter_number: 1,
-          title: 'Chương 1: Khởi đầu mới',
-          word_count: 1200,
-          published_at: new Date().toISOString().split('T')[0],
-          content: 'Nội dung chương 1 của tiểu thuyết mới được tạo lập...'
         }
       ],
       reviews: initialReviews,
@@ -309,14 +338,24 @@ export const apiService = {
     novels.unshift(newNovel);
     setStoredData(STORAGE_KEYS.NOVELS, novels);
 
-    try {
-      await fetch('/api/novels', {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(novelData)
-      });
-    } catch {}
+    // Tạo chương 1
+    if (createdBackendNovel?.id && firstChap?.content) {
+      try {
+        await fetch('/api/chapters', {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          credentials: 'include',
+          body: JSON.stringify({
+            novel_id: createdBackendNovel.id,
+            title: firstChap.title || 'Chương 1: Khởi đầu mới',
+            content: firstChap.content,
+            chapter_number: 1
+          })
+        });
+      } catch (err) {
+        console.warn('Lỗi tạo chương 1 trên backend:', err);
+      }
+    }
 
     return newNovel;
   },
@@ -402,7 +441,7 @@ export const apiService = {
   },
 
 
-  // 2. CATEGORIES - Tải thực tế từ Backend /api/categories
+  // Categories
   async getCategories() {
     try {
       const res = await fetch('/api/categories', { signal: AbortSignal.timeout(3000) });
@@ -429,7 +468,7 @@ export const apiService = {
     return getStoredData(STORAGE_KEYS.CATEGORIES, INITIAL_CATEGORIES);
   },
 
-  // 3. AUTHORS - Tải thực tế từ Backend /api/authors
+  // Authors
   async getAuthors() {
     try {
       const res = await fetch('/api/authors', { signal: AbortSignal.timeout(3000) });
@@ -563,7 +602,7 @@ export const apiService = {
     return true;
   },
 
-  // ======================== AUTHENTICATION API ========================
+  // Authentication API
 
   /**
    * Đăng nhập người dùng qua Backend /api/auth/login
@@ -646,7 +685,7 @@ export const apiService = {
         return {
           success: true,
           message: payload.message || 'Mã đặt lại mật khẩu đã được tạo.',
-          resetToken: payload.resetToken, // Token trả về trong môi trường dev
+          resetToken: payload.resetToken,
         };
       } else {
         return {

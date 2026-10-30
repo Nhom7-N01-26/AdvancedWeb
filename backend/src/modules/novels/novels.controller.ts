@@ -27,14 +27,14 @@ export class NovelsController {
 
   @Public()
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách truyện có phân trang, tìm kiếm & bộ lọc đa tiêu chí (Booking style)' })
+  @ApiOperation({ summary: 'Lấy danh sách truyện có phân trang, tìm kiếm & bộ lọc đa tiêu chí ' })
   findAll(@Query() query: QueryNovelDto) {
     return this.novelsService.findAll(query);
   }
 
   @Public()
   @Get('featured')
-  @ApiOperation({ summary: 'Lấy danh sách các bộ truyện nổi bật (Dành cho Hero Banner/Carousels)' })
+  @ApiOperation({ summary: 'Lấy danh sách các bộ truyện nổi bật' })
   findFeatured() {
     return this.novelsService.findFeatured();
   }
@@ -55,11 +55,11 @@ export class NovelsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.READER, UserRole.AUTHOR, UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Đăng bộ truyện mới (Chỉ Quản trị viên Admin)' })
+  @ApiOperation({ summary: 'Đăng bộ truyện mới (Người dùng đã đăng nhập hoặc Admin)' })
   create(@Body() dto: CreateNovelDto, @CurrentUser() user: UserEntity) {
-    return this.novelsService.create(dto, user.id);
+    return this.novelsService.create(dto, user.id, user.full_name || user.username);
   }
 
   @Put(':id')

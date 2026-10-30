@@ -12,17 +12,17 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Bảo mật HTTP Headers (Câu 4c)
+  // Bảo mật HTTP Headers
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' }, // Cho phép tải ảnh bìa tĩnh từ frontend
     }),
   );
 
-  // Xử lý cookie bảo mật HttpOnly (Câu 3d & 4c)
+  // Xử lý cookie HttpOnly
   app.use(cookieParser());
 
-  // Cấu hình CORS cho phép Frontend tương tác an toàn
+  // Cấu hình CORS
   app.enableCors({
     origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'],
     credentials: true,
@@ -33,7 +33,7 @@ async function bootstrap() {
   // Tiền tố API toàn cục
   app.setGlobalPrefix('api');
 
-  // Phục vụ tài nguyên tĩnh (Ảnh bìa truyện - Covers)
+  // Phục vụ tài nguyên tĩnh
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     prefix: '/public/',
   });
@@ -47,16 +47,16 @@ async function bootstrap() {
     }),
   );
 
-  // Tự động loại bỏ password_hash và thông tin nhạy cảm (Bài học Gumtree F12 - Câu 3d)
+  // Loại bỏ thông tin nhạy cảm trong response
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector)),
     new TransformInterceptor(),
   );
 
-  // Bộ lọc ngoại lệ toàn diện RESTful (Câu 7a)
+  // Bộ lọc ngoại lệ RESTful
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // Cấu hình Swagger OpenAPI UI (Câu 4b)
+  // Cấu hình Swagger OpenAPI UI
   const config = new DocumentBuilder()
     .setTitle('Novel Manager API - Đề án Web Nâng Cao Phenikaa')
     .setDescription(

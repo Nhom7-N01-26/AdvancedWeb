@@ -37,7 +37,7 @@ export default function ReaderPage() {
         const data = await axiosClient.get(`/chapters/${chapterId}`);
         setChapter(data);
 
-        // 2. Ghi nhận lịch sử đọc tự động (Usability & Câu 1 US-04)
+        // Ghi nhận lịch sử đọc tự động
         if (user && data.novel_id) {
           try {
             await axiosClient.post('/history/record', {

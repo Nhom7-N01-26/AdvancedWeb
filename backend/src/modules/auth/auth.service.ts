@@ -39,7 +39,7 @@ export class AuthService {
       }
     }
 
-    // 2. Băm mật khẩu với bcrypt salt rounds = 10 (Câu 4c An ninh)
+    // Băm mật khẩu
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(dto.password, saltRounds);
 
@@ -50,7 +50,7 @@ export class AuthService {
       password_hash: passwordHash,
       full_name: dto.full_name,
       avatar_url: dto.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${dto.username}`,
-      role: UserRole.READER, // Tài khoản khách đăng ký luôn luôn là Độc giả (Reader)
+      role: UserRole.READER, // Mặc định là Reader
       is_active: true,
     });
 

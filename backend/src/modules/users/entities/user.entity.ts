@@ -27,7 +27,7 @@ export class UserEntity {
   email: string;
 
   @Column()
-  @Exclude() // CRITICAL: Chống lộ mật khẩu qua F12 DevTools (Gumtree leak protection)
+  @Exclude()
   password_hash: string;
 
   @Column({ length: 100 })

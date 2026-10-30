@@ -19,7 +19,7 @@ export default function Header({
   const [tempAvatar, setTempAvatar] = useState('');
   const fileInputRef = useRef(null);
 
-  // Danh sách avatar mẫu phong phú để người dùng chọn nhanh nếu không muốn tải ảnh
+  // Danh sách avatar mẫu
   const PRESET_AVATARS = [
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
@@ -31,7 +31,7 @@ export default function Header({
     'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150&auto=format&fit=crop&q=80'
   ];
 
-  // Xử lý khi người dùng chọn ảnh từ máy tính / điện thoại / thư viện
+  // Xử lý tải ảnh đại diện
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -119,29 +119,30 @@ export default function Header({
               </>
             ) : (
               <>
-                {/* ONLY ADMIN: Post / Create novel & Management shortcut */}
-                {currentUser.role === 'admin' && (
-                  <>
-                    <Button
-                      variant="outline-light"
-                      size="sm"
-                      className="fw-bold px-3 py-1 rounded-1"
-                      onClick={onOpenCreateNovel}
-                    >
-                      <i className="bi bi-plus-circle me-1"></i>
-                      Đăng truyện mới
-                    </Button>
+                
+                <Button
+                  variant="outline-light"
+                  size="sm"
+                  className="fw-bold px-3 py-1 rounded-1"
+                  onClick={onOpenCreateNovel}
+                  title="Đăng tải tác phẩm mới của bạn"
+                >
+                  <i className="bi bi-plus-circle me-1"></i>
+                  Đăng truyện mới
+                </Button>
 
-                    <Button
-                      variant="warning"
-                      size="sm"
-                      className="fw-bold px-3 py-1 text-dark rounded-1"
-                      onClick={onOpenCrud}
-                    >
-                      <i className="bi bi-kanban me-1"></i>
-                      Quản lý tác phẩm
-                    </Button>
-                  </>
+                
+                {currentUser.role === 'admin' && (
+                  <Button
+                    variant="warning"
+                    size="sm"
+                    className="fw-bold px-3 py-1 text-dark rounded-1"
+                    onClick={onOpenCrud}
+                    title="Bảng điều khiển quản lý toàn bộ tác phẩm (Quyền Admin)"
+                  >
+                    <i className="bi bi-kanban me-1"></i>
+                    Quản lý tác phẩm
+                  </Button>
                 )}
 
                 {/* User Profile Dropdown */}
@@ -181,7 +182,7 @@ export default function Header({
                       <div className={`badge mt-1 ${currentUser.role === 'admin' ? 'bg-danger' : 'bg-primary'}`}>{currentUser.badge}</div>
                     </div>
 
-                    {/* NÚT ĐỔI AVATAR TỪ THƯ VIỆN ẢNH NGƯỜI DÙNG */}
+                    
                     <div className="px-2 mb-2">
                       <Button
                         size="sm"
@@ -198,14 +199,19 @@ export default function Header({
                       </Button>
                     </div>
 
+                    <Dropdown.Item onClick={onOpenCreateNovel} className="small text-success fw-semibold">
+                      <i className="bi bi-plus-circle me-2"></i>
+                      Đăng truyện mới
+                    </Dropdown.Item>
+
                     <Dropdown.Item onClick={() => setActiveNav('bookmarks')} className="small">
                       <i className="bi bi-bookmark-heart text-danger me-2"></i>
                       Tủ sách đã lưu ({bookmarkCount})
                     </Dropdown.Item>
                     {currentUser.role === 'admin' && (
-                      <Dropdown.Item onClick={onOpenCrud} className="small">
-                        <i className="bi bi-sliders text-primary me-2"></i>
-                        Quản lý tác phẩm
+                      <Dropdown.Item onClick={onOpenCrud} className="small text-primary fw-semibold">
+                        <i className="bi bi-sliders me-2"></i>
+                        Quản lý tác phẩm (Admin)
                       </Dropdown.Item>
                     )}
 
@@ -313,7 +319,7 @@ export default function Header({
           </Modal.Footer>
         </Modal>
 
-        {/* Navigation Tabs (Booking.com signature navigation pills) */}
+        {/* Navigation Tabs */}
         <nav className="d-flex align-items-center gap-1 overflow-auto pb-2" style={{ whiteSpace: 'nowrap' }}>
           <button
             className={`booking-nav-pill ${activeNav === 'novels' ? 'active' : ''}`}

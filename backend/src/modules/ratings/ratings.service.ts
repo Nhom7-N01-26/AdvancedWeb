@@ -30,7 +30,7 @@ export class RatingsService {
       novel_id: novelId,
       total_ratings: totalRatings,
       avg_rating: parseFloat(avgRating.toFixed(2)),
-      booking_score: parseFloat((avgRating * 2).toFixed(1)), // Chuyển đổi thang điểm 10 Booking.com
+      booking_score: parseFloat((avgRating * 2).toFixed(1)), // Thang điểm 10
       items: ratings.map((r) => ({
         id: r.id,
         score: r.score,

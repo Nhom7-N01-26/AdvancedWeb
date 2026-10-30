@@ -9,6 +9,7 @@ import AuthorSection from './components/AuthorSection';
 import NovelDetailModal from './components/NovelDetailModal';
 import ReaderModal from './components/ReaderModal';
 import CrudManagerModal from './components/CrudManagerModal';
+import CreateNovelModal from './components/CreateNovelModal';
 import AuthModal from './components/AuthModal';
 import Footer from './components/Footer';
 
@@ -71,6 +72,7 @@ export default function App() {
   const [readingSession, setReadingSession] = useState(null); // { novel, chapterId }
   const [showCrudModal, setShowCrudModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showCreateNovelModal, setShowCreateNovelModal] = useState(false);
 
   // Toast feedback
   const [toast, setToast] = useState({ show: false, message: '', variant: 'primary' });
@@ -86,7 +88,7 @@ export default function App() {
       const health = await apiService.checkBackendHealth();
       setBackendStatus(health);
 
-      // 2. Tải danh mục & tác giả & tiểu thuyết (thực tế 100%)
+      // Tải danh mục, tác giả và tiểu thuyết
       const cats = await apiService.getCategories();
       const auths = await apiService.getAuthors();
       const novs = await apiService.getNovels();
@@ -242,7 +244,7 @@ export default function App() {
 
   const handleChapterChange = async (newChapterId) => {
     if (readingSession) {
-      // Mỗi lần chuyển chương mới là 1 lượt đọc thực tế -> tăng lượt xem
+      // Tăng lượt xem khi đọc chương
       const newViews = await apiService.incrementNovelViews(readingSession.novel.id);
       const updatedNovel = { ...readingSession.novel, total_views: newViews };
       setReadingSession({ novel: updatedNovel, chapterId: newChapterId });
@@ -267,7 +269,7 @@ export default function App() {
     }
   };
 
-  // ĐÁNH GIÁ: Tính toán chuẩn từ review gửi lên
+  // Gửi đánh giá
   const handleAddReview = async (novelId, reviewData) => {
     const updatedNovel = await apiService.addReview(novelId, reviewData);
     if (updatedNovel) {
@@ -294,15 +296,25 @@ export default function App() {
     setShowCrudModal(true);
   };
 
-  // CRUD Handlers (Only Admin)
+  const handleOpenCreateNovel = () => {
+    if (!currentUser) {
+      showToast('Vui lòng đăng nhập để đăng truyện mới!', 'warning');
+      setShowAuthModal(true);
+      return;
+    }
+    setShowCreateNovelModal(true);
+  };
+
+  // CRUD Handlers
   const handleCreateNovel = async (newNovelData) => {
-    if (currentUser?.role !== 'admin') {
-      showToast('Chỉ Quản trị viên (Admin) mới có quyền thêm tác phẩm!', 'danger');
+    if (!currentUser) {
+      showToast('Vui lòng đăng nhập để đăng tác phẩm!', 'warning');
+      setShowAuthModal(true);
       return;
     }
     const created = await apiService.createNovel(newNovelData);
     setNovels((prev) => [created, ...prev]);
-    showToast(`Đã thêm tiểu thuyết "${created.title}" thành công!`, 'success');
+    showToast(`Đã xuất bản tiểu thuyết "${created.title}" thành công! 🎉`, 'success');
   };
 
   const handleUpdateNovel = async (id, updatedData) => {
@@ -449,7 +461,7 @@ export default function App() {
         onUpdateAvatar={handleUpdateAvatar}
         bookmarkCount={bookmarks.length}
         onOpenCrud={handleOpenCrud}
-        onOpenCreateNovel={handleOpenCrud}
+        onOpenCreateNovel={handleOpenCreateNovel}
         backendStatus={backendStatus}
         onOpenAuth={() => setShowAuthModal(true)}
         onLogout={handleLogout}
@@ -525,7 +537,7 @@ export default function App() {
 
 
 
-      {/* 7. Featured Authors Section (Số tác phẩm & lượt xem thực tế) */}
+      {/* Featured Authors Section */}
       <AuthorSection
         authors={authors}
         novels={novels}
@@ -536,7 +548,7 @@ export default function App() {
         }}
       />
 
-      {/* 8. Booking.com Footer with Group 7 Credentials */}
+      {/* Footer */}
       <Footer
         onSelectCategory={(cat) => {
           setSelectedCategory(cat);
@@ -546,10 +558,10 @@ export default function App() {
           setSearchQuery(authorName);
           window.scrollTo({ top: 400, behavior: 'smooth' });
         }}
-        onOpenCreateNovel={handleOpenCrud}
+        onOpenCreateNovel={handleOpenCreateNovel}
       />
 
-      {/* MODAL 1: Novel Detail Modal (Số liệu thực tế, bình luận thực tế) */}
+      {/* Novel Detail Modal */}
       <NovelDetailModal
         show={Boolean(detailNovel)}
         onHide={() => setDetailNovel(null)}
@@ -561,7 +573,7 @@ export default function App() {
         currentUser={currentUser}
       />
 
-      {/* MODAL 2: Full Chapter Reader (Mỗi lần đọc là 1 lượt xem) */}
+      {/* Full Chapter Reader */}
       <ReaderModal
         show={Boolean(readingSession)}
         onHide={() => setReadingSession(null)}
@@ -570,7 +582,7 @@ export default function App() {
         onChapterChange={handleChapterChange}
       />
 
-      {/* MODAL 3: Auth Modal (Đăng nhập / Đăng ký / Quên mật khẩu) */}
+      {/* Auth Modal */}
       <AuthModal
         show={showAuthModal}
         onHide={() => setShowAuthModal(false)}
@@ -578,7 +590,7 @@ export default function App() {
         authService={apiService}
       />
 
-      {/* MODAL 4: CRUD Management Panel */}
+      {/* CRUD Management Panel */}
       <CrudManagerModal
         show={showCrudModal}
         onHide={() => setShowCrudModal(false)}
@@ -591,6 +603,16 @@ export default function App() {
         onAddChapter={handleAddChapter}
         onResetData={handleResetData}
         backendStatus={backendStatus}
+      />
+
+      {/* Create Novel Modal */}
+      <CreateNovelModal
+        show={showCreateNovelModal}
+        onHide={() => setShowCreateNovelModal(false)}
+        categories={categories}
+        authors={authors}
+        currentUser={currentUser}
+        onCreateNovel={handleCreateNovel}
       />
 
       {/* Global Toast Notification */}

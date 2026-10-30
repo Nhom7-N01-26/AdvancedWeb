@@ -33,11 +33,11 @@ export class ChaptersService {
       throw new NotFoundException(`Không tìm thấy chương truyện với ID: ${id}`);
     }
 
-    // Tăng lượt xem cho chương và truyện (Câu 2b Sơ đồ thuật toán 3)
+    // Tăng lượt xem cho chương và truyện
     await this.chapterRepo.increment({ id }, 'views', 1);
     await this.novelRepo.increment({ id: chapter.novel_id }, 'total_views', 1);
 
-    // Tìm chương trước và chương sau để điều hướng (Usability)
+    // Điều hướng chương
     const prevChapter = await this.chapterRepo.findOne({
       where: {
         novel_id: chapter.novel_id,

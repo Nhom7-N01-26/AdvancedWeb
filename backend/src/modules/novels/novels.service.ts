@@ -34,13 +34,13 @@ export class NovelsService {
     const limit = Number(query.limit) || 12;
     const skip = (page - 1) * limit;
 
-    // Xử lý tối ưu Eager Loading chống N+1 Query (Câu 6b)
+    // Eager loading relations
     const qb = this.novelRepo
       .createQueryBuilder('novel')
       .leftJoinAndSelect('novel.author', 'author')
       .leftJoinAndSelect('novel.categories', 'category');
 
-    // Tìm kiếm từ khóa (Full-Text Search Index - Câu 6b)
+    // Tìm kiếm theo từ khóa
     if (query.keyword) {
       qb.andWhere(
         '(novel.title LIKE :kw OR novel.description LIKE :kw OR author.pen_name LIKE :kw)',
@@ -58,7 +58,7 @@ export class NovelsService {
       qb.andWhere('novel.status = :status', { status: query.status });
     }
 
-    // Lọc theo đánh giá tối thiểu (Phong cách Booking.com: ví dụ >= 8.0/10 hoặc >= 4.0/5 sao)
+    // Lọc theo đánh giá tối thiểu
     if (query.min_rating) {
       qb.andWhere('novel.avg_rating >= :minRating', {
         minRating: query.min_rating,
@@ -144,14 +144,17 @@ export class NovelsService {
     return updated ? updated.total_views : 1;
   }
 
-  async create(dto: CreateNovelDto, userId: number): Promise<NovelEntity> {
+  async create(dto: CreateNovelDto, userId: number, userName?: string): Promise<NovelEntity> {
     let author = await this.authorRepo.findOne({ where: { user_id: userId } });
     if (!author) {
       author = this.authorRepo.create({
         user_id: userId,
-        pen_name: 'Tác Giả Mới',
+        pen_name: dto.author_name?.trim() || userName || 'Tác Giả Mới',
       });
       author = await this.authorRepo.save(author);
+    } else if (dto.author_name && dto.author_name.trim() && dto.author_name.trim() !== author.pen_name) {
+      author.pen_name = dto.author_name.trim();
+      await this.authorRepo.save(author);
     }
 
     let slug = this.slugify(dto.title);

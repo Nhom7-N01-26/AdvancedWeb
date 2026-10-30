@@ -13,7 +13,7 @@ export default function NovelDetailModal({
 }) {
   const [activeTab, setActiveTab] = useState('overview'); // overview, chapters, reviews
   const [newReviewText, setNewReviewText] = useState('');
-  const [newRatingScore, setNewRatingScore] = useState(5); // Thang điểm 1-5 sao chuẩn sql_nhom_7.sql
+  const [newRatingScore, setNewRatingScore] = useState(5);
 
   if (!novel) return null;
 
