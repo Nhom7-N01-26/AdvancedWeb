@@ -1,4 +1,4 @@
-# Novel Manager - Web Quản Lý & Đọc Tiểu Thuyết Trực Tuyến
+# Novel Manager - Web Đọc Tiểu Thuyết Trực Tuyến
 
 Dự án môn học **Thiết kế Web Nâng Cao** - Khoa Công nghệ Thông tin, Trường Đại học Phenikaa.
 
